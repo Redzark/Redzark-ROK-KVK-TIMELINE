@@ -3,230 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KvK 통합 대시보드</title>
+    <title>RoK KvK Dashboard</title>
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --accent-ruins: #6c5ce7; /* 보라색 (폐허/제단) */
+            --accent-pass: #0984e3;  /* 파란색 (관문) */
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
         body {
-            font-family: 'Malgun Gothic', sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
-        }
-
-        /* 1. 달력 영역 (상단 유지) */
-        .calendar-section {
-            background-color: #252525;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
-            text-align: center;
-        }
-        .calendar-placeholder {
-            /* 달력 기능을 넣을 자리 (예시 디자인) */
-            height: 150px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border: 2px dashed #555;
-            color: #888;
         }
 
-        /* 2. 타이머 메인 컨테이너 (그리드 배치) */
-        /* 폐허/제단과 관문을 동등한 비중으로 배치 */
+        h1 {
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+
+        /* 메인 그리드 레이아웃 (타이머) */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
         }
 
-        /* 공통 카드 스타일 */
-        .timer-card {
-            background-color: #2c2c2c;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #444;
+        /* 카드 스타일 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: transform 0.2s;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* 타이틀 스타일 */
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 헤더 디자인 */
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            border-bottom: 1px solid #555;
             padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
 
         .card-title {
-            font-size: 1.4em;
-            font-weight: bold;
+            font-size: 1.25em;
+            font-weight: 800;
         }
 
-        /* 폐허/제단용 색상 포인트 (강조가 아닌 구분용) */
-        .type-recurring .card-title { color: #ffab40; } /* 오렌지 계열 */
-        
-        /* 관문용 색상 포인트 */
-        .type-pass .card-title { color: #64b5f6; } /* 블루 계열 */
+        /* 타입별 색상 구분 */
+        .type-ruins .card-title { color: var(--accent-ruins); }
+        .type-pass .card-title { color: var(--accent-pass); }
 
-        /* 회차 입력 필드 */
-        .round-input {
-            width: 50px;
-            background: #444;
-            border: 1px solid #666;
-            color: white;
-            text-align: center;
-            padding: 3px;
-            border-radius: 4px;
+        /* 입력 필드 스타일 */
+        label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-sub);
+            margin-bottom: 5px;
         }
 
-        /* 타이머 숫자 */
-        .timer-display {
-            font-size: 2.2em;
-            font-family: monospace;
-            font-weight: bold;
-            text-align: center;
-            margin: 15px 0;
-            color: #fff;
-            background: #222;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        /* 목표 시간 설정 입력창 (평소엔 작게, 필요시 수정) */
-        .target-time-input {
-            background: #333;
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 5px;
+        input[type="number"], 
+        input[type="datetime-local"] {
             width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
             box-sizing: border-box;
-            font-size: 0.9em;
+            font-size: 0.95em;
         }
         
-        label { font-size: 0.8em; color: #aaa; }
+        input[type="number"] {
+            width: 60px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        /* 타이머 디스플레이 */
+        .timer-display {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #2d3436;
+            letter-spacing: 1px;
+        }
+
+        .timer-over {
+            color: #d63031; /* 시간 종료 시 빨간색 */
+        }
+
+        /* 달력 섹션 (하단 배치) */
+        .calendar-section {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .day-name {
+            font-weight: bold;
+            color: var(--text-sub);
+            padding-bottom: 10px;
+        }
+
+        .calendar-day {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-weight: bold;
+        }
+
+        .calendar-day.today {
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+            color: #1565c0;
+        }
+        
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
 
     </style>
 </head>
 <body>
 
-    <div class="calendar-section">
-        <h2>📅 KvK 일정 달력</h2>
-        <div class="calendar-placeholder">
-            (여기에 기존 달력 코드가 들어갑니다)
-        </div>
-    </div>
+    <h1>🏰 KvK 작전 상황판</h1>
 
     <div class="dashboard-grid">
         
-        <div class="timer-card type-recurring">
+        <div class="card type-ruins">
             <div class="card-header">
-                <span class="card-title">고대 폐허</span>
+                <span class="card-title">✨ 고대 폐허</span>
                 <div>
-                    <input type="number" class="round-input" value="1"> 회차
+                    <input type="number" id="round-ruins" value="1" onchange="saveData('round-ruins')"> 회차
                 </div>
             </div>
-            <label>다음 오픈 시간 설정:</label>
-            <input type="datetime-local" class="target-time-input" id="input-ruins">
-            <div class="timer-display" id="timer-ruins">00:00:00</div>
+            <div>
+                <label>다음 오픈 시간</label>
+                <input type="datetime-local" id="time-ruins" onchange="saveData('time-ruins')">
+            </div>
+            <div class="timer-display" id="display-ruins">00:00:00</div>
         </div>
 
-        <div class="timer-card type-recurring">
+        <div class="card type-ruins">
             <div class="card-header">
-                <span class="card-title">어둠의 제단</span>
+                <span class="card-title">🔥 어둠의 제단</span>
                 <div>
-                    <input type="number" class="round-input" value="1"> 회차
+                    <input type="number" id="round-altar" value="1" onchange="saveData('round-altar')"> 회차
                 </div>
             </div>
-            <label>다음 오픈 시간 설정:</label>
-            <input type="datetime-local" class="target-time-input" id="input-altar">
-            <div class="timer-display" id="timer-altar">00:00:00</div>
-        </div>
-
-        <div class="timer-card type-pass">
-            <div class="card-header">
-                <span class="card-title">4 관문</span>
+            <div>
+                <label>다음 오픈 시간</label>
+                <input type="datetime-local" id="time-altar" onchange="saveData('time-altar')">
             </div>
-            <label>오픈 예정 시간:</label>
-            <input type="datetime-local" class="target-time-input" id="input-pass4">
-            <div class="timer-display" id="timer-pass4">00:00:00</div>
+            <div class="timer-display" id="display-altar">00:00:00</div>
         </div>
 
-        <div class="timer-card type-pass">
+        <div class="card type-pass">
             <div class="card-header">
-                <span class="card-title">5 관문</span>
+                <span class="card-title">🛡️ 4 관문</span>
             </div>
-            <label>오픈 예정 시간:</label>
-            <input type="datetime-local" class="target-time-input" id="input-pass5">
-            <div class="timer-display" id="timer-pass5">00:00:00</div>
+            <div>
+                <label>오픈 예정 시간</label>
+                <input type="datetime-local" id="time-pass4" onchange="saveData('time-pass4')">
+            </div>
+            <div class="timer-display" id="display-pass4">00:00:00</div>
         </div>
 
-        <div class="timer-card type-pass">
+        <div class="card type-pass">
             <div class="card-header">
-                <span class="card-title">6 관문</span>
+                <span class="card-title">🛡️ 5 관문</span>
             </div>
-            <label>오픈 예정 시간:</label>
-            <input type="datetime-local" class="target-time-input" id="input-pass6">
-            <div class="timer-display" id="timer-pass6">00:00:00</div>
+            <div>
+                <label>오픈 예정 시간</label>
+                <input type="datetime-local" id="time-pass5" onchange="saveData('time-pass5')">
+            </div>
+            <div class="timer-display" id="display-pass5">00:00:00</div>
         </div>
 
-    </div>
-
-    <script>
-        // 타이머 로직: 1초마다 화면 갱신
-        function updateTimers() {
-            const ids = ['ruins', 'altar', 'pass4', 'pass5', 'pass6'];
-
-            ids.forEach(id => {
-                const inputEl = document.getElementById(`input-${id}`);
-                const displayEl = document.getElementById(`timer-${id}`);
-                
-                // 사용자가 설정한 목표 시간 가져오기
-                const targetValue = inputEl.value;
-                
-                if (!targetValue) {
-                    displayEl.innerText = "시간 설정 필요";
-                    displayEl.style.color = "#888";
-                    return;
-                }
-
-                const targetDate = new Date(targetValue).getTime();
-                const now = new Date().getTime();
-                const diff = targetDate - now;
-
-                if (diff < 0) {
-                    displayEl.innerText = "오픈됨 / 종료";
-                    displayEl.style.color = "#ff4444";
-                } else {
-                    displayEl.style.color = "#fff";
-                    
-                    // 시, 분, 초 계산
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                    // 화면 표시 포맷
-                    let timeString = "";
-                    if(days > 0) timeString += `${days}일 `;
-                    timeString += `${String(hours).padStart(2, '0')}:`;
-                    timeString += `${String(minutes).padStart(2, '0')}:`;
-                    timeString += `${String(seconds).padStart(2, '0')}`;
-                    
-                    displayEl.innerText = timeString;
-                }
-            });
-        }
-
-        // 1초마다 updateTimers 함수 실행
-        setInterval(updateTimers, 1000);
-
-        // 초기 실행
-        updateTimers();
-    </script>
-</body>
-</html>
+        <div class="card type-pass">
+            <div class="card-header">
+                <span class="card-title">🛡️ 6 관문</span>
+            </div>
+            <div>
+                <label>오픈 예정 시간</label>
+                <input type="datetime-local" id="time-pass6" onchange="saveData('time-pass6')">
+            </div>
+            <div class="timer-display" id="display-pass6">00:00:00</div>
