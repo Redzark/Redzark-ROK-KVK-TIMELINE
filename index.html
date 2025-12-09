@@ -3,329 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1689서버 신기묘산 KvK 일정</title>
+    <title>KvK 타이머 대시보드</title>
     <style>
-        /* --- [1] 기본 스타일 --- */
-        * { box-sizing: border-box; }
         body {
-            font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-            background-color: #121212; /* 더 깊은 검은색 배경 */
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px 10px;
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+
+        /* 1. 폐허 및 제단 (최우선 강조 구역) */
+        .priority-zone {
+            background-color: #2c0b0b; /* 붉은 계열 어두운 배경 */
+            border: 3px solid #ff4444; /* 강조 테두리 */
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px; /* 관문 구역과 거리두기 */
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+        }
+
+        .priority-header {
+            color: #ff4444;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .ruins-altar-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            color: #ff5252;
-            margin: 0 0 5px 0;
-            font-size: 1.8rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        h2 {
-            color: #b0bec5;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            font-weight: 400;
+            justify-content: space-around;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        /* --- [2] 달력 컨테이너 --- */
-        .calendar-wrapper {
-            width: 100%;
-            max-width: 1200px;
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            padding: 15px;
-            overflow-x: auto; /* 모바일 대응 */
+        .highlight-box {
+            background-color: #4a1c1c;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
         }
 
-        table {
-            width: 100%;
-            min-width: 800px; /* 표 깨짐 방지 최소 너비 */
-            border-collapse: collapse;
-            table-layout: fixed;
+        .highlight-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffd700; /* 금색 텍스트 */
+            margin-bottom: 10px;
+            display: block;
         }
 
-        /* --- [3] 헤더 (요일) --- */
-        th {
-            background-color: #2c2c2c;
-            color: #ffffff;
-            padding: 12px;
-            font-weight: 600;
-            border-bottom: 2px solid #424242;
+        .round-input {
+            background-color: #333;
+            border: 1px solid #777;
+            color: white;
+            padding: 5px;
+            width: 60px;
+            text-align: center;
+            font-size: 1.1em;
+            border-radius: 4px;
         }
-        .sun { color: #ff5252; }
-        .sat { color: #69f0ae; }
 
-        /* --- [4] 날짜 셀 --- */
-        td {
-            height: 140px; /* 일정 표시를 위해 높이 확보 */
-            border: 1px solid #333;
-            vertical-align: top;
-            padding: 6px;
-            background-color: #1e1e1e;
-            transition: background-color 0.2s;
+        .timer-display {
+            font-size: 2.5em; /* 시간 표시를 가장 크게 */
+            font-weight: bold;
+            margin-top: 10px;
+            font-family: monospace;
         }
-        td:hover {
+
+        /* 2. 관문 구역 (일반 구역) */
+        .pass-zone {
             background-color: #252525;
+            border: 1px solid #555;
+            border-radius: 10px;
+            padding: 20px;
         }
 
-        /* 날짜 숫자 */
-        .date-num {
-            display: block;
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: #909090;
+        .pass-header {
+            color: #aaa;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
         }
-        
-        /* 오늘 날짜 강조 */
-        .today {
-            background-color: #2a2018 !important; /* 살짝 붉은/갈색 틴트 */
-            border: 2px solid #ffab40 !important;
+
+        .pass-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
-        .today .date-num {
-            color: #ffab40;
-            text-decoration: underline;
+
+        .pass-box {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
         }
-        .today-badge {
-            display: inline-block;
-            background-color: #ffab40;
-            color: #000;
-            font-size: 0.7rem;
+
+        .pass-title {
+            color: #88c0d0;
+            font-size: 1.2em;
             font-weight: bold;
-            padding: 1px 4px;
-            border-radius: 4px;
-            margin-left: 5px;
-            vertical-align: middle;
-        }
-
-        /* --- [5] 이벤트 라벨 디자인 (깔끔하게) --- */
-        .event-item {
+            margin-bottom: 5px;
             display: block;
-            font-size: 0.75rem;
-            margin-bottom: 3px;
-            padding: 3px 6px;
-            border-radius: 4px;
-            color: #fff;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* 이벤트 종류별 색상 */
-        .evt-ruins { background-color: #7b1fa2; border-left: 3px solid #e040fb; } /* 폐허 (보라) */
-        .evt-altar { background-color: #bf360c; border-left: 3px solid #ff5722; } /* 제단 (주황) */
-        .evt-pass  { background-color: #0d47a1; border-left: 3px solid #448aff; } /* 관문 (파랑) */
-        .evt-phase { background-color: #37474f; border-left: 3px solid #90a4ae; color: #eceff1; } /* 연대기 (회색) */
-        
-        /* 시간 강조 텍스트 */
-        .time-badge {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            margin-right: 4px;
-            opacity: 0.9;
+        .pass-timer {
+            font-size: 1.5em;
+            font-family: monospace;
+            color: #eceff4;
         }
 
+        /* 공통 라벨 스타일 */
+        label {
+            font-size: 0.9em;
+            color: #bbb;
+        }
     </style>
 </head>
 <body>
 
-    <h1>1689서버 신기묘산 타임라인</h1>
-    <h2>2025년 12월 KvK 전체 일정표</h2>
+    <div class="priority-zone">
+        <div class="priority-header">⚠ 중요: 폐허 및 제단 현황 ⚠</div>
+        
+        <div class="ruins-altar-container">
+            <div class="highlight-box">
+                <span class="highlight-title">고대 폐허</span>
+                <div>
+                    <label>현재 회차: </label>
+                    <input type="number" class="round-input" value="1"> 회
+                </div>
+                <div class="timer-display" id="ruins-timer">00:00:00</div>
+                <div style="color:#ffaaaa; font-size:0.9em;">(오픈까지 남은 시간)</div>
+            </div>
 
-    <div class="calendar-wrapper">
-        <table id="calendar-table">
-            <thead>
-                <tr>
-                    <th class="sun">일</th>
-                    <th>월</th>
-                    <th>화</th>
-                    <th>수</th>
-                    <th>목</th>
-                    <th>금</th>
-                    <th class="sat">토</th>
-                </tr>
-            </thead>
-            <tbody id="calendar-body">
-                </tbody>
-        </table>
+            <div class="highlight-box">
+                <span class="highlight-title">어둠의 제단</span>
+                <div>
+                    <label>현재 회차: </label>
+                    <input type="number" class="round-input" value="1"> 회
+                </div>
+                <div class="timer-display" id="altar-timer">00:00:00</div>
+                <div style="color:#ffaaaa; font-size:0.9em;">(오픈까지 남은 시간)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pass-zone">
+        <div class="pass-header">관문 오픈 예정 시간</div>
+        
+        <div class="pass-container">
+            <div class="pass-box">
+                <span class="pass-title">4 관문</span>
+                <div class="pass-timer" id="pass4-timer">D-Day 00:00:00</div>
+            </div>
+
+            <div class="pass-box">
+                <span class="pass-title">5 관문</span>
+                <div class="pass-timer" id="pass5-timer">D-Day 00:00:00</div>
+            </div>
+
+            <div class="pass-box">
+                <span class="pass-title">6 관문</span>
+                <div class="pass-timer" id="pass6-timer">D-Day 00:00:00</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- [1] 안전한 유틸리티 함수 ---
-        // 날짜 객체를 YYYY-MM-DD 문자열로 변환
-        function fmtDate(d) {
-            var y = d.getFullYear();
-            var m = ('0' + (d.getMonth() + 1)).slice(-2);
-            var dd = ('0' + d.getDate()).slice(-2);
-            return y + '-' + m + '-' + dd;
-        }
-
-        // 날짜 객체에서 시간 문자열(HH:mm) 추출
-        function fmtTime(d) {
-            var h = ('0' + d.getHours()).slice(-2);
-            var m = ('0' + d.getMinutes()).slice(-2);
-            return h + ':' + m;
-        }
-
-        // 시간 더하기 (시간 단위)
-        function addHours(d, h) {
-            var copied = new Date(d.getTime());
-            copied.setTime(copied.getTime() + (h * 60 * 60 * 1000));
-            return copied;
-        }
-
-        // --- [2] 데이터 생성 로직 ---
-        // 모든 이벤트를 날짜별로 저장할 객체: eventsByDate["2025-12-11"] = [...]
-        var eventsByDate = {};
-
-        function addEvent(dateStr, title, type, timeStr) {
-            if (!eventsByDate[dateStr]) {
-                eventsByDate[dateStr] = [];
-            }
-            eventsByDate[dateStr].push({
-                title: title,
-                type: type,
-                time: timeStr || ""
-            });
-        }
-
-        // 1. 고정 연대기 및 관문 일정 등록
-        // (사용자가 제공한 이미지 및 텍스트 기반)
-        var fixedSchedule = [
-            ["2025-12-05", "첫걸음 시작", "evt-phase"],
-            ["2025-12-06", "원정군 주둔지", "evt-phase"],
-            ["2025-12-07", "눈에는 눈", "evt-phase"],
-            ["2025-12-08", "진영 요새", "evt-phase"],
-            ["2025-12-08", "요지의 전쟁", "evt-phase"],
-            ["2025-12-10", "협력", "evt-phase"],
-            ["2025-12-11", "징벌", "evt-phase"],
-            ["2025-12-13", "복수", "evt-phase"],
-            ["2025-12-14", "4관문 개방 (00:30)", "evt-pass"],
-            ["2025-12-14", "먹구름", "evt-phase"],
-            ["2025-12-15", "늑대와 왕", "evt-phase"],
-            ["2025-12-16", "신전 개방", "evt-phase"],
-            ["2025-12-17", "순례", "evt-phase"],
-            ["2025-12-18", "5관문 개방 (00:30)", "evt-pass"],
-            ["2025-12-18", "전진", "evt-phase"],
-            ["2025-12-19", "성전 개방", "evt-phase"],
-            ["2025-12-19", "성전 점령", "evt-phase"],
-            ["2025-12-20", "6관문 개방 (00:30)", "evt-pass"],
-            ["2025-12-21", "접전 허가", "evt-phase"],
-            ["2025-12-22", "희생자", "evt-phase"],
-            ["2025-12-24", "갈등과 분쟁", "evt-phase"],
-            ["2025-12-26", "단합의 장 (끝)", "evt-phase"]
-        ];
-
-        for (var i = 0; i < fixedSchedule.length; i++) {
-            addEvent(fixedSchedule[i][0], fixedSchedule[i][1], fixedSchedule[i][2], "");
-        }
-
-        // 2. 반복 이벤트 생성 (폐허/제단) - 자동으로 계산해서 달력에 추가
-        // 폐허: 12-11 00:10 시작, 40시간 주기, 28회
-        var ruinsStart = new Date(2025, 11, 11, 0, 10); // 12월(11) 11일
-        for (var k = 1; k <= 28; k++) {
-            var dStr = fmtDate(ruinsStart);
-            var tStr = fmtTime(ruinsStart);
-            addEvent(dStr, "폐허 " + k + "차", "evt-ruins", tStr);
-            ruinsStart = addHours(ruinsStart, 40);
-        }
-
-        // 제단: 12-22 00:10 시작, 86시간 주기, 10회
-        var altarStart = new Date(2025, 11, 22, 0, 10); // 12월(11) 22일
-        for (var k = 1; k <= 10; k++) {
-            var dStr = fmtDate(altarStart);
-            var tStr = fmtTime(altarStart);
-            addEvent(dStr, "제단 " + k + "차", "evt-altar", tStr);
-            altarStart = addHours(altarStart, 86);
-        }
-
-
-        // --- [3] 달력 렌더링 로직 ---
-        function renderCalendar() {
-            var year = 2025;
-            var month = 11; // 12월 (0-based index)
-            
-            var firstDate = new Date(year, month, 1);
-            var startDay = firstDate.getDay(); // 0(일) ~ 6(토)
-            var lastDateVal = new Date(year, month + 1, 0).getDate(); // 31일
-
-            var today = new Date();
-            var isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
-            var todayDate = today.getDate();
-
-            var tbody = document.getElementById("calendar-body");
-            var html = "";
-            var dayCount = 1;
-            var rowOpen = false;
-
-            // 6주 고정 루프 (달력 모양 유지)
-            for (var r = 0; r < 6; r++) {
-                // 날짜가 끝났으면 루프 중단 (빈 줄 방지)
-                if (dayCount > lastDateVal) break;
-
-                html += "<tr>";
-                for (var c = 0; c < 7; c++) {
-                    // 첫째 주 공백 처리
-                    if (r === 0 && c < startDay) {
-                        html += "<td style='border:none; background:transparent;'></td>";
-                    } 
-                    // 날짜 출력
-                    else if (dayCount <= lastDateVal) {
-                        var dateKey = year + "-" + ("0" + (month + 1)).slice(-2) + "-" + ("0" + dayCount).slice(-2);
-                        
-                        // 오늘 날짜 확인
-                        var tdClass = "";
-                        var todayBadge = "";
-                        var numColor = "";
-                        
-                        if (isCurrentMonth && dayCount === todayDate) {
-                            tdClass = "today";
-                            todayBadge = "<span class='today-badge'>오늘</span>";
-                        }
-                        if (c === 0) numColor = "style='color:#ff5252'"; // 일요일
-                        if (c === 6) numColor = "style='color:#69f0ae'"; // 토요일
-
-                        // 셀 내용 조립
-                        html += "<td class='" + tdClass + "'>";
-                        html += "<span class='date-num' " + numColor + ">" + dayCount + todayBadge + "</span>";
-
-                        // 해당 날짜의 이벤트 렌더링 (시간순 정렬)
-                        if (eventsByDate[dateKey]) {
-                            // 시간순 정렬 (단순 문자열 비교)
-                            eventsByDate[dateKey].sort(function(a, b) {
-                                return a.time.localeCompare(b.time);
-                            });
-
-                            for (var e = 0; e < eventsByDate[dateKey].length; e++) {
-                                var evt = eventsByDate[dateKey][e];
-                                var timeHtml = evt.time ? "<span class='time-badge'>" + evt.time + "</span>" : "";
-                                html += "<div class='event-item " + evt.type + "'>" + timeHtml + evt.title + "</div>";
-                            }
-                        }
-
-                        html += "</td>";
-                        dayCount++;
-                    } 
-                    // 월말 공백 처리
-                    else {
-                        html += "<td style='border:none; background:transparent;'></td>";
-                    }
-                }
-                html += "</tr>";
-            }
-            tbody.innerHTML = html;
-        }
-
-        // --- 실행 ---
-        // DOM 로드 후 실행 (안전장치)
-        setTimeout(renderCalendar, 50); 
-
+        // 여기에 타이머 로직을 연결하면 됩니다.
+        // 예시로 텍스트만 표시되도록 두었습니다.
+        
+        // 실제 사용 시에는 목표 시간을 설정하고 setInterval로 1초마다 갱신하는 코드를 추가합니다.
+        console.log("레이아웃이 로드되었습니다.");
     </script>
 </body>
 </html>
