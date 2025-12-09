@@ -6,15 +6,13 @@
     <title>RoK KvK Dashboard</title>
     <style>
         :root {
-            --bg-color: #f4f6f8; /* 아주 밝은 회색 배경 */
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-sub: #7f8c8d;
-            --accent-ruins: #e67e22; /* 폐허: 오렌지 */
-            --accent-altar: #c0392b; /* 제단: 레드 */
-            --accent-pass: #2980b9;  /* 관문: 블루 */
-            --shadow: 0 8px 16px rgba(0,0,0,0.05);
-            --radius: 12px;
+            --bg-color: #f5f7fa;
+            --section-bg: #ffffff;
+            --text-main: #2d3436;
+            --accent-ruins: #6c5ce7; /* 보라 (폐허) */
+            --accent-altar: #d63031; /* 빨강 (제단) */
+            --accent-pass: #0984e3;  /* 파랑 (관문) */
+            --timer-bg: #f1f2f6;
         }
 
         body {
@@ -29,42 +27,360 @@
         }
 
         h1 {
-            font-size: 2rem;
-            color: #34495e;
-            margin-bottom: 40px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-bottom: 40px;
+            color: #2c3e50;
         }
 
-        /* 그리드 레이아웃 */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
+        /* 공통 레이아웃 컨테이너 */
+        .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             margin-bottom: 40px;
+        }
+
+        /* 섹션 제목 */
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #636e72;
+            border-left: 5px solid #2d3436;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 1. 폐허/제단 그리드 (2열) */
+        .grid-recurring {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        /* 2. 관문 그리드 (3열) */
+        .grid-passes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         /* 카드 디자인 */
         .card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            background: var(--section-bg);
+            border-radius: 12px;
             padding: 25px;
-            border-top: 5px solid #ccc; /* 상단 컬러바 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: transform 0.2s;
         }
+        .card:hover { transform: translateY(-2px); }
 
-        /* 카드별 포인트 컬러 */
-        .card.ruins { border-color: var(--accent-ruins); }
-        .card.altar { border-color: var(--accent-altar); }
-        .card.pass { border-color: var(--accent-pass); }
-
+        /* 카드 헤더 */
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .card-title { font-size: 1.4em; font-weight: 800; }
+        
+        /* 색상 포인트 */
+        .ruins .card-title { color: var(--accent-ruins); }
+        .altar .card-title { color: var(--accent-altar); }
+        .pass .card-title { color: var(--accent-pass); }
+
+        /* 입력 폼 스타일 */
+        .input-group { margin-bottom: 15px; }
+        
+        label {
+            display: block;
+            font-size: 0.85em;
+            color: #636e72;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #b2bec3;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* 타이머 숫자 */
+        .timer-display {
+            background-color: var(--timer-bg);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-size: 2.2rem;
+            font-family: 'Consolas', monospace;
+            font-weight: 700;
+            color: #2d3436;
+            margin-top: auto;
+        }
+
+        .timer-over {
+            color: #d63031;
+            background-color: #fab1a0;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* 달력 섹션 */
+        .calendar-section {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .day-head { font-weight: bold; padding-bottom: 10px; color: #b2bec3; }
+        
+        .day-cell {
+            padding: 15px;
+            background: #f1f2f6;
+            border-radius: 8px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-weight: bold;
+            color: #2d3436;
+        }
+
+        .day-cell.today {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            color: #0984e3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🏰 KvK 작전 상황판</h1>
+
+    <div class="container">
+        <div class="section-title" style="border-color: #6c5ce7;">⚔️ 주요 오브젝트 (회차/시간)</div>
+        <div class="grid-recurring">
+            
+            <div class="card ruins">
+                <div class="card-header">
+                    <span class="card-title">✨ 고대 폐허</span>
+                    <div>
+                        <label style="display:inline; margin-right:5px;">회차</label>
+                        <input type="number" id="round-ruins" value="1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>오픈 목표 시간</label>
+                    <input type="datetime-local" id="time-ruins">
+                </div>
+                <div class="timer-display" id="disp-ruins">--:--:--</div>
+            </div>
+
+            <div class="card altar">
+                <div class="card-header">
+                    <span class="card-title">🔥 어둠의 제단</span>
+                    <div>
+                        <label style="display:inline; margin-right:5px;">회차</label>
+                        <input type="number" id="round-altar" value="1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>오픈 목표 시간</label>
+                    <input type="datetime-local" id="time-altar">
+                </div>
+                <div class="timer-display" id="disp-altar">--:--:--</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section-title" style="border-color: #0984e3;">🛡️ 관문 오픈 일정</div>
+        <div class="grid-passes">
+            
+            <div class="card pass">
+                <div class="card-header"><span class="card-title">4 관문</span></div>
+                <div class="input-group">
+                    <label>오픈 예정</label>
+                    <input type="datetime-local" id="time-pass4">
+                </div>
+                <div class="timer-display" id="disp-pass4">--:--:--</div>
+            </div>
+
+            <div class="card pass">
+                <div class="card-header"><span class="card-title">5 관문</span></div>
+                <div class="input-group">
+                    <label>오픈 예정</label>
+                    <input type="datetime-local" id="time-pass5">
+                </div>
+                <div class="timer-display" id="disp-pass5">--:--:--</div>
+            </div>
+
+            <div class="card pass">
+                <div class="card-header"><span class="card-title">6 관문</span></div>
+                <div class="input-group">
+                    <label>오픈 예정</label>
+                    <input type="datetime-local" id="time-pass6">
+                </div>
+                <div class="timer-display" id="disp-pass6">--:--:--</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container calendar-section">
+        <div class="section-title">📅 2025년 12월 일정</div>
+        <div class="calendar-grid" id="calendar-body">
+            </div>
+    </div>
+
+    <script>
+        // 초기 기본값 설정 (오늘: 2025-12-09)
+        const defaults = {
+            'time-ruins': '2025-12-09T12:00',
+            'time-altar': '2025-12-09T12:00',
+            'time-pass4': '2025-12-09T18:00',
+            'time-pass5': '2025-12-10T18:00',
+            'time-pass6': '2025-12-11T18:00',
+            'round-ruins': '1',
+            'round-altar': '1'
+        };
+
+        // 1. 저장된 데이터 로드 (없으면 기본값 사용)
+        function loadData() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                const saved = localStorage.getItem(input.id);
+                if (saved) {
+                    input.value = saved;
+                } else if (defaults[input.id]) {
+                    input.value = defaults[input.id]; // 최초 실행 시 기본값 채움
+                }
+            });
+        }
+
+        // 2. 데이터 변경 시 저장
+        function setupListeners() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('change', (e) => {
+                    localStorage.setItem(e.target.id, e.target.value);
+                    updateTimers(); // 즉시 갱신
+                });
+            });
+        }
+
+        // 3. 타이머 로직
+        function updateTimers() {
+            const now = new Date().getTime();
+            const ids = ['ruins', 'altar', 'pass4', 'pass5', 'pass6'];
+
+            ids.forEach(id => {
+                const inputEl = document.getElementById(`time-${id}`);
+                const dispEl = document.getElementById(`disp-${id}`);
+
+                if (!inputEl || !inputEl.value) {
+                    dispEl.innerText = "--:--:--";
+                    return;
+                }
+
+                const target = new Date(inputEl.value).getTime();
+                const diff = target - now;
+
+                if (diff < 0) {
+                    dispEl.innerText = "OPEN / 종료";
+                    dispEl.classList.add('timer-over');
+                } else {
+                    dispEl.classList.remove('timer-over');
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    let txt = "";
+                    if (days > 0) txt += `${days}일 `;
+                    txt += `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+                    dispEl.innerText = txt;
+                }
+            });
+        }
+
+        // 4. 달력 그리기 (2025년 12월 고정)
+        function drawCalendar() {
+            const container = document.getElementById('calendar-body');
+            const heads = ['일','월','화','수','목','금','토'];
+            
+            heads.forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'day-head';
+                div.innerText = h;
+                container.appendChild(div);
+            });
+
+            // 2025.12.01 = 월요일(1)
+            const startDay = 1; 
+            const totalDays = 31;
+            const today = 9;
+
+            // 빈칸
+            for(let i=0; i<startDay; i++) {
+                container.appendChild(document.createElement('div'));
+            }
+
+            // 날짜
+            for(let i=1; i<=totalDays; i++) {
+                const div = document.createElement('div');
+                div.className = 'day-cell';
+                div.innerText = i;
+                if(i === today) {
+                    div.classList.add('today');
+                    div.innerHTML += '<span style="font-size:0.7em; margin-top:5px;">TODAY</span>';
+                }
+                container.appendChild(div);
+            }
+        }
+
+        // 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            setupListeners();
+            drawCalendar();
+            setInterval(updateTimers, 1000);
+            updateTimers();
+        });
+    </script>
+</body>
+</html>
