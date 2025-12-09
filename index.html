@@ -6,108 +6,116 @@
     <title>1689서버 KvK 일정 및 타이머</title>
     <style>
         /* --- 기본 스타일 --- */
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             background-color: #1a1a2e;
             color: #ffffff;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             text-align: center;
         }
         .container {
             max-width: 900px;
             margin: 0 auto;
+            padding-bottom: 50px;
         }
-        h1 { color: #ff3859; margin-bottom: 5px; font-size: 2em; }
-        h2 { color: #b0b0b0; font-size: 1.2em; margin-bottom: 25px; }
+        h1 { color: #ff3859; margin: 10px 0 5px 0; font-size: 1.8em; }
+        h2 { color: #b0b0b0; font-size: 1em; margin-bottom: 20px; }
 
         /* --- 달력 스타일 --- */
-        #calendar-container {
+        .calendar-wrapper {
             background-color: #2a2a4a;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 10px;
-            overflow-x: auto;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            overflow-x: auto; /* 모바일 가로 스크롤 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            margin-bottom: 30px;
         }
-        .calendar {
+        table {
             width: 100%;
-            min-width: 600px;
+            min-width: 600px; /* 표가 찌그러지지 않게 최소 너비 설정 */
             border-collapse: collapse;
             table-layout: fixed;
         }
-        .calendar th {
+        th {
             background-color: #33395b;
             color: #ffcc00;
-            padding: 10px 0;
+            padding: 8px;
             border: 1px solid #444;
         }
-        .calendar td {
-            height: 110px;
+        td {
+            height: 100px;
             border: 1px solid #444;
-            padding: 5px;
+            padding: 4px;
             vertical-align: top;
             text-align: left;
             position: relative;
+            background-color: #2a2a4a;
         }
-        
-        /* 날짜 숫자 */
-        .day-number { font-size: 1.2em; font-weight: bold; margin-bottom: 2px; display: block; }
-        .sunday .day-number { color: #ff5757; }
-        .saturday .day-number { color: #8af7a0; }
 
-        /* 오늘 날짜 강조 */
-        .today {
+        /* 날짜 숫자 */
+        .day-num { font-size: 1.1em; font-weight: bold; display: block; margin-bottom: 2px; }
+        .sun-col { color: #ff5757; }
+        .sat-col { color: #8af7a0; }
+
+        /* [요청 디자인] 오늘 날짜 */
+        .today-cell {
             border: 2px solid #ffcc00 !important;
-            box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.1);
+            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.2);
         }
-        .today-mark {
+        .today-tag {
             display: block;
             color: #ffcc00;
             font-size: 0.9em;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         /* 이벤트 라벨 */
-        .event-label {
-            font-size: 0.8em;
+        .evt {
             display: block;
-            padding: 3px;
+            font-size: 0.75em;
+            color: #fff;
+            padding: 2px;
             margin-top: 2px;
             border-radius: 3px;
-            color: #fff;
             text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .type-phase { background-color: #555; }
-        .type-fixed { background-color: #007bff; }
-        .type-major { background-color: #ff8c00; font-weight: bold; }
+        .evt-ph { background-color: #555; } /* 일반 연대기 */
+        .evt-fx { background-color: #007bff; } /* 고정/관문 */
+        .evt-mj { background-color: #ff8c00; font-weight: bold; color: #fff; } /* 주요 */
 
-        /* --- 카운트다운 스타일 --- */
-        .section-title {
+        /* --- 타이머 스타일 --- */
+        .sec-title {
             color: #ffcc00;
-            font-size: 1.5em;
-            margin: 40px 0 20px 0;
+            font-size: 1.4em;
             border-bottom: 2px solid #33395b;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            margin: 30px 0 15px 0;
         }
-        .count-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        .timer-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
         }
-        .count-card {
+        .t-card {
             background-color: #2a2a4a;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1 1 300px; /* 반응형 크기 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-        .count-title { font-size: 1.3em; color: #8af7a0; font-weight: bold; margin-bottom: 10px; }
-        .count-timer { font-size: 2.2em; color: #4CAF50; font-weight: bold; margin: 10px 0; }
-        .count-sub { font-size: 0.9em; color: #aaa; }
-        .count-cycle { font-size: 0.9em; color: #ff8c00; margin-bottom: 5px; }
+        .t-name { font-size: 1.2em; color: #8af7a0; font-weight: bold; margin-bottom: 5px; }
+        .t-time { font-size: 2em; color: #4CAF50; font-weight: bold; margin: 10px 0; }
+        .t-info { font-size: 0.85em; color: #aaa; }
+        .t-cycle { color: #ff8c00; font-size: 0.9em; font-weight: bold; }
         
-        #loading-msg { color: #aaa; margin-top: 20px; }
+        #err-log { color: #aaa; margin-top: 20px; font-size: 0.8em; }
     </style>
 </head>
 <body>
@@ -115,68 +123,204 @@
     <div class="container">
         <h1>1689서버 신기묘산 KVK 타임라인</h1> 
         <h2>2025년 12월 KvK 전체 일정</h2>
-        
-        <div id="calendar-container">
-            <table class="calendar" id="calendar-table">
+
+        <div class="calendar-wrapper">
+            <table id="cal-table">
                 <thead>
                     <tr>
-                        <th style="color:#ff5757;">일</th><th>월</th><th>화</th><th>수</th><th>목</th><th style="color:#8af7a0;">금</th><th>토</th>
+                        <th style="color:#ff5757;">일</th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
+                        <th style="color:#8af7a0;">토</th>
                     </tr>
                 </thead>
-                <tbody id="calendar-body"></tbody>
+                <tbody id="cal-body"></tbody>
             </table>
         </div>
 
-        <div class="section-title">🕒 폐허/제단 실시간 카운트다운</div>
-        <div class="count-grid" id="timer-container"></div>
-        
-        <div id="loading-msg">로딩중... 화면이 안 뜨면 새로고침 해주세요.</div>
+        <div class="sec-title">🕒 폐허/제단 실시간 카운트다운</div>
+        <div class="timer-box" id="timers"></div>
+
+        <div id="err-log"></div>
     </div>
 
     <script>
-        // [수정된 핵심 함수] 날짜 파싱 에러 방지
-        function safeParseDate(str) {
-            if (!str) return new Date();
-            
-            // 공백을 기준으로 날짜와 시간을 나눔
-            var parts = str.split(' ');
-            var dateStr = parts[0];
-            var timeStr = parts[1] || "00:00"; // 시간이 없으면 00:00으로 강제 설정 (에러 해결)
-
-            var dateParts = dateStr.split('-');
-            var timeParts = timeStr.split(':');
-
-            // 월은 0부터 시작하므로 -1
-            return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+        // --- 구형 브라우저 지원을 위한 헬퍼 함수 ---
+        function pad(n) {
+            return (n < 10 ? '0' : '') + n;
         }
 
-        // --- 데이터 설정 ---
-        var RECURRING = [
+        function safeDate(str) {
+            // "2025-12-05 12:30" 형식 파싱
+            if(!str) return new Date();
+            var parts = str.split(' ');
+            var d = parts[0].split('-');
+            var t = (parts[1] || "00:00").split(':');
+            return new Date(d[0], d[1]-1, d[2], t[0], t[1]);
+        }
+
+        // --- 데이터 정의 ---
+        // 1. 달력 이벤트 (YYYY-MM-DD)
+        var CAL_DATA = [
+            { d: "2025-12-05", n: "첫걸음", t: "evt-ph" },
+            { d: "2025-12-06", n: "원정군 주둔지", t: "evt-fx" },
+            { d: "2025-12-07", n: "눈에는 눈", t: "evt-ph" },
+            { d: "2025-12-08", n: "진영 요새", t: "evt-fx" },
+            { d: "2025-12-08", n: "요지의 전쟁", t: "evt-ph" },
+            { d: "2025-12-10", n: "협력", t: "evt-ph" },
+            { d: "2025-12-11", n: "폐허 오픈 시작", t: "evt-mj" },
+            { d: "2025-12-11", n: "징벌", t: "evt-ph" },
+            { d: "2025-12-13", n: "복수", t: "evt-ph" },
+            { d: "2025-12-14", n: "4관문 개방", t: "evt-fx" },
+            { d: "2025-12-14", n: "먹구름", t: "evt-ph" },
+            { d: "2025-12-15", n: "늑대와 왕", t: "evt-ph" },
+            { d: "2025-12-16", n: "신전 개방", t: "evt-fx" },
+            { d: "2025-12-17", n: "순례", t: "evt-ph" },
+            { d: "2025-12-18", n: "5관문 개방", t: "evt-fx" },
+            { d: "2025-12-18", n: "전진", t: "evt-ph" },
+            { d: "2025-12-19", n: "성전 개방", t: "evt-fx" },
+            { d: "2025-12-19", n: "성전 점령", t: "evt-ph" },
+            { d: "2025-12-20", n: "6관문 개방", t: "evt-fx" },
+            { d: "2025-12-21", n: "접전 허가", t: "evt-ph" },
+            { d: "2025-12-22", n: "제단 오픈 시작", t: "evt-mj" },
+            { d: "2025-12-22", n: "희생자", t: "evt-ph" },
+            { d: "2025-12-24", n: "갈등과 분쟁", t: "evt-ph" },
+            { d: "2025-12-26", n: "단합의 장 (끝)", t: "evt-ph" }
+        ];
+
+        // 2. 타이머 데이터 (YYYY-MM-DD HH:MM)
+        var TIMER_DATA = [
             { name: "폐허", start: "2025-12-11 00:10", interval: 40, max: 28 },
             { name: "제단", start: "2025-12-22 00:10", interval: 86, max: 10 }
         ];
 
-        var CALENDAR_EVENTS = [
-            { date: "2025-12-05", name: "첫걸음", type: "type-phase" },
-            { date: "2025-12-06", name: "원정군 주둔지", type: "type-fixed" },
-            { date: "2025-12-07", name: "눈에는 눈", type: "type-phase" },
-            { date: "2025-12-08", name: "진영 요새", type: "type-fixed" },
-            { date: "2025-12-08", name: "요지의 전쟁", type: "type-phase" },
-            { date: "2025-12-10", name: "협력", type: "type-phase" },
-            { date: "2025-12-11", name: "폐허 오픈 시작", type: "type-major" },
-            { date: "2025-12-11", name: "징벌", type: "type-phase" },
-            { date: "2025-12-13", name: "복수", type: "type-phase" },
-            { date: "2025-12-14", name: "4관문 개방", type: "type-fixed" },
-            { date: "2025-12-14", name: "먹구름", type: "type-phase" },
-            { date: "2025-12-15", name: "늑대와 왕", type: "type-phase" },
-            { date: "2025-12-16", name: "신전 개방", type: "type-fixed" },
-            { date: "2025-12-17", name: "순례", type: "type-phase" },
-            { date: "2025-12-18", name: "5관문 개방", type: "type-fixed" },
-            { date: "2025-12-18", name: "전진", type: "type-phase" },
-            { date: "2025-12-19", name: "성전 개방", type: "type-fixed" },
-            { date: "2025-12-19", name: "성전 점령", type: "type-phase" },
-            { date: "2025-12-20", name: "6관문 개방", type: "type-fixed" },
-            { date: "2025-12-21", name: "접전 허가", type: "type-phase" },
-            { date: "2025-12-22", name: "제단 오픈 시작", type: "type-major" },
-            { date: "2025-12-22", name: "희생자", type: "type-phase" },
-            { date: "2025-12-24
+        // --- 메인 로직 ---
+        function init() {
+            try {
+                renderCalendar();
+                setInterval(renderTimers, 1000);
+                renderTimers();
+            } catch (e) {
+                document.getElementById('err-log').innerHTML = "오류 발생: " + e.message;
+            }
+        }
+
+        function renderCalendar() {
+            var tbody = document.getElementById('cal-body');
+            var html = "";
+            var year = 2025;
+            var month = 11; // 12월 (0-based)
+            
+            // 2025년 12월 1일은 월요일
+            var firstDate = new Date(year, month, 1);
+            var startDay = firstDate.getDay(); // 0:일, 1:월 ...
+            var lastDate = new Date(year, month + 1, 0).getDate(); // 31
+            
+            var dayCount = 1;
+            var rowOpen = false;
+
+            // 최대 6주
+            for (var r = 0; r < 6; r++) {
+                if (dayCount > lastDate) break;
+                
+                html += "<tr>";
+                for (var c = 0; c < 7; c++) {
+                    // 첫 주 공백 채우기
+                    if (r === 0 && c < startDay) {
+                        html += "<td style='border:none; background:#1f1f38;'></td>";
+                    } else if (dayCount <= lastDate) {
+                        html += buildCell(year, month, dayCount, c);
+                        dayCount++;
+                    } else {
+                        html += "<td style='border:none; background:#1f1f38;'></td>";
+                    }
+                }
+                html += "</tr>";
+            }
+            tbody.innerHTML = html;
+        }
+
+        function buildCell(y, m, d, w) {
+            // 오늘 확인
+            var now = new Date();
+            var isToday = (now.getFullYear() === y && now.getMonth() === m && now.getDate() === d);
+            
+            var classes = "";
+            var content = "";
+            
+            if (isToday) {
+                classes += " today-cell";
+                content += "<span class='today-tag'>오늘</span>";
+            }
+            
+            // 날짜 숫자 색상
+            var numClass = "";
+            if (w === 0) numClass = "sun-col";
+            if (w === 6) numClass = "sat-col";
+            
+            content += "<span class='day-num " + numClass + "'>" + d + "</span>";
+
+            // 이벤트 찾기
+            var dateKey = y + "-" + pad(m + 1) + "-" + pad(d);
+            for (var i = 0; i < CAL_DATA.length; i++) {
+                if (CAL_DATA[i].d === dateKey) {
+                    content += "<span class='evt " + CAL_DATA[i].t + "'>" + CAL_DATA[i].n + "</span>";
+                }
+            }
+            
+            return "<td class='" + classes + "'>" + content + "</td>";
+        }
+
+        function renderTimers() {
+            var box = document.getElementById('timers');
+            var now = new Date();
+            var html = "";
+
+            for (var i = 0; i < TIMER_DATA.length; i++) {
+                var item = TIMER_DATA[i];
+                var start = safeDate(item.start);
+                var ms = item.interval * 3600000;
+                var count = 1;
+
+                // 다음 시간 찾기
+                var next = new Date(start.getTime());
+                while (next < now) {
+                    next = new Date(next.getTime() + ms);
+                    count++;
+                }
+
+                var diff = next - now;
+                var d = Math.floor(diff / 86400000);
+                var h = Math.floor((diff % 86400000) / 3600000);
+                var m = Math.floor((diff % 3600000) / 60000);
+                var s = Math.floor((diff % 60000) / 1000);
+
+                var timeStr = (d > 0 ? d + "일 " : "") + pad(h) + ":" + pad(m) + ":" + pad(s);
+                var info = "[ " + count + "회차 / 총 " + item.max + "회 ]";
+
+                if (count > item.max) {
+                    timeStr = "종료됨";
+                    info = "모든 일정 종료";
+                }
+                
+                // 날짜 표시
+                var nextStr = (next.getMonth() + 1) + "." + next.getDate() + ". " + pad(next.getHours()) + ":" + pad(next.getMinutes());
+
+                html += "<div class='t-card'>" +
+                        "<div class='t-name'>" + item.name + "</div>" +
+                        "<div class='t-cycle'>" + info + "</div>" +
+                        "<div class='t-time'>" + timeStr + "</div>" +
+                        "<div class='t-info'>다음: " + nextStr + "</div>" +
+                        "</div>";
+            }
+            box.innerHTML = html;
+        }
+
+        // 실행
+        window.onload = init;
+    </script>
+</body>
+</html>
