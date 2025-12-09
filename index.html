@@ -6,13 +6,14 @@
     <title>RoK KvK Dashboard</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
+            --bg-color: #f4f6f8; /* 아주 밝은 회색 배경 */
             --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --accent-ruins: #6c5ce7; /* 보라색 (폐허/제단) */
-            --accent-pass: #0984e3;  /* 파란색 (관문) */
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --accent-ruins: #e67e22; /* 폐허: 오렌지 */
+            --accent-altar: #c0392b; /* 제단: 레드 */
+            --accent-pass: #2980b9;  /* 관문: 블루 */
+            --shadow: 0 8px 16px rgba(0,0,0,0.05);
             --radius: 12px;
         }
 
@@ -21,219 +22,49 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1 {
-            margin-bottom: 20px;
-            color: #2d3436;
+            font-size: 2rem;
+            color: #34495e;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* 메인 그리드 레이아웃 (타이머) */
+        /* 그리드 레이아웃 */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
             width: 100%;
             max-width: 1200px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        /* 카드 스타일 */
+        /* 카드 디자인 */
         .card {
             background-color: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 24px;
-            transition: transform 0.2s;
+            padding: 25px;
+            border-top: 5px solid #ccc; /* 상단 컬러바 */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        .card:hover {
-            transform: translateY(-3px);
-        }
+        /* 카드별 포인트 컬러 */
+        .card.ruins { border-color: var(--accent-ruins); }
+        .card.altar { border-color: var(--accent-altar); }
+        .card.pass { border-color: var(--accent-pass); }
 
-        /* 헤더 디자인 */
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .card-title {
-            font-size: 1.25em;
-            font-weight: 800;
-        }
-
-        /* 타입별 색상 구분 */
-        .type-ruins .card-title { color: var(--accent-ruins); }
-        .type-pass .card-title { color: var(--accent-pass); }
-
-        /* 입력 필드 스타일 */
-        label {
-            display: block;
-            font-size: 0.85em;
-            color: var(--text-sub);
-            margin-bottom: 5px;
-        }
-
-        input[type="number"], 
-        input[type="datetime-local"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-family: inherit;
-            box-sizing: border-box;
-            font-size: 0.95em;
-        }
-        
-        input[type="number"] {
-            width: 60px;
-            text-align: center;
-            display: inline-block;
-        }
-
-        /* 타이머 디스플레이 */
-        .timer-display {
-            font-size: 2em;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            color: #2d3436;
-            letter-spacing: 1px;
-        }
-
-        .timer-over {
-            color: #d63031; /* 시간 종료 시 빨간색 */
-        }
-
-        /* 달력 섹션 (하단 배치) */
-        .calendar-section {
-            width: 100%;
-            max-width: 1200px;
-            background-color: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            text-align: center;
-        }
-
-        .day-name {
-            font-weight: bold;
-            color: var(--text-sub);
-            padding-bottom: 10px;
-        }
-
-        .calendar-day {
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            font-weight: bold;
-        }
-
-        .calendar-day.today {
-            background-color: #e3f2fd;
-            border: 2px solid #2196f3;
-            color: #1565c0;
-        }
-        
-        .calendar-day:hover {
-            background-color: #e9ecef;
-        }
-
-    </style>
-</head>
-<body>
-
-    <h1>🏰 KvK 작전 상황판</h1>
-
-    <div class="dashboard-grid">
-        
-        <div class="card type-ruins">
-            <div class="card-header">
-                <span class="card-title">✨ 고대 폐허</span>
-                <div>
-                    <input type="number" id="round-ruins" value="1" onchange="saveData('round-ruins')"> 회차
-                </div>
-            </div>
-            <div>
-                <label>다음 오픈 시간</label>
-                <input type="datetime-local" id="time-ruins" onchange="saveData('time-ruins')">
-            </div>
-            <div class="timer-display" id="display-ruins">00:00:00</div>
-        </div>
-
-        <div class="card type-ruins">
-            <div class="card-header">
-                <span class="card-title">🔥 어둠의 제단</span>
-                <div>
-                    <input type="number" id="round-altar" value="1" onchange="saveData('round-altar')"> 회차
-                </div>
-            </div>
-            <div>
-                <label>다음 오픈 시간</label>
-                <input type="datetime-local" id="time-altar" onchange="saveData('time-altar')">
-            </div>
-            <div class="timer-display" id="display-altar">00:00:00</div>
-        </div>
-
-        <div class="card type-pass">
-            <div class="card-header">
-                <span class="card-title">🛡️ 4 관문</span>
-            </div>
-            <div>
-                <label>오픈 예정 시간</label>
-                <input type="datetime-local" id="time-pass4" onchange="saveData('time-pass4')">
-            </div>
-            <div class="timer-display" id="display-pass4">00:00:00</div>
-        </div>
-
-        <div class="card type-pass">
-            <div class="card-header">
-                <span class="card-title">🛡️ 5 관문</span>
-            </div>
-            <div>
-                <label>오픈 예정 시간</label>
-                <input type="datetime-local" id="time-pass5" onchange="saveData('time-pass5')">
-            </div>
-            <div class="timer-display" id="display-pass5">00:00:00</div>
-        </div>
-
-        <div class="card type-pass">
-            <div class="card-header">
-                <span class="card-title">🛡️ 6 관문</span>
-            </div>
-            <div>
-                <label>오픈 예정 시간</label>
-                <input type="datetime-local" id="time-pass6" onchange="saveData('time-pass6')">
-            </div>
-            <div class="timer-display" id="display-pass6">00:00:00</div>
+            margin-bottom
