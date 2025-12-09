@@ -3,241 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1689서버 신기묘산 KVK 타임라인</title>
+    <title>1689서버 KvK 일정 달력</title>
     <style>
-        /* CSS 스타일 시작 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #16182a; 
+            background-color: #1a1a2e;
             color: #ffffff;
             margin: 0;
-            padding: 30px 10px;
+            padding: 20px;
             text-align: center;
         }
         .container {
-            max-width: 1100px;
+            max-width: 900px;
             margin: 0 auto;
         }
         h1 {
-            color: #ff3859; 
+            color: #ff3859;
             margin-bottom: 5px;
-            font-size: 2.2em;
+            font-size: 2em;
         }
         h2 {
             color: #b0b0b0;
-            font-size: 1.1em;
-            margin-bottom: 30px;
-        }
-        .status-header {
-            background-color: #33395b;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: space-around;
-        }
-        .status-item {
-            flex-basis: 48%;
-            text-align: left;
-            padding: 0 10px;
-        }
-        .status-item h3 {
-            color: #ffcc00; 
-            margin: 0 0 5px 0;
             font-size: 1.2em;
+            margin-bottom: 25px;
         }
-        .status-item .time-left {
-            font-size: 1.8em;
+        /* 달력 스타일 */
+        #calendar-container {
+            background-color: #2a2a4a;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .calendar th {
+            background-color: #33395b;
+            color: #ffcc00;
+            padding: 10px 0;
+            font-size: 1.1em;
+            border: 1px solid #3a3a5a;
+        }
+        .calendar td {
+            height: 100px;
+            border: 1px solid #3a3a5a;
+            padding: 5px;
+            vertical-align: top;
+            text-align: left;
+        }
+        .day-number {
+            font-size: 1.5em;
             font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
             color: #fff;
         }
+        .sunday { color: #ff5757; }
+        .saturday { color: #8af7a0; }
+        .today {
+            background-color: #4CAF50 !important;
+            color: #fff;
+            border: 3px solid #ffcc00;
+        }
+        /* 이벤트 스타일 */
+        .event-label {
+            font-size: 0.75em;
+            display: block;
+            padding: 2px 4px;
+            margin-top: 2px;
+            border-radius: 3px;
+            line-height: 1.2;
+            font-weight: 500;
+            text-align: center;
+        }
+        .event-phase { background-color: #555; color: #fff; }
+        .event-pass { background-color: #007bff; color: #fff; }
+        .event-major { background-color: #ff8c00; color: #fff; }
 
-        .section-title {
-            color: #4CAF50;
-            font-size: 1.8em;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #33395b;
-            padding-bottom: 5px;
-        }
-        .event-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        .event-card {
-            background-color: #2a2a4a;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        .event-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #8af7a0; 
-            margin-bottom: 5px;
-        }
-        .countdown {
-            font-size: 2em;
-            font-weight: 700;
-            color: #ffcc00; 
-            letter-spacing: 1px;
-            margin-top: 5px;
-        }
-        .next-time {
-            font-size: 0.8em;
-            color: #aaa;
-            margin-top: 5px;
-        }
-        .cycle-info {
-            font-size: 0.9em;
-            color: #ff8c00; 
-            font-weight: 600;
-            margin-top: 5px;
-        }
-        .passed {
-            color: #ff5757;
-            font-size: 1.1em;
-        }
-        /* CSS 스타일 끝 */
     </style>
 </head>
 <body>
     <div class="container">
         <h1>1689서버 신기묘산 KVK 타임라인</h1> 
-        <h2>[ KvK 신기묘산 | 서버 1689 ]</h2>
+        <h2>2025년 12월 KvK 전체 일정</h2>
         
-        <div class="status-header" id="chronology-status"></div>
-
-        <div class="section-title">🔑 다음 관문 오픈 및 주요 이벤트까지 남은 시간</div>
-        <div class="event-grid" id="countdown-grid-fixed"></div>
-
-        <div class="section-title">🔁 반복 이벤트 남은 시간 (회차 표시)</div>
-        <div class="event-grid" id="countdown-grid-recurring"></div>
+        <div id="calendar-container">
+            <table class="calendar" id="kvk-calendar">
+                <thead>
+                    <tr>
+                        <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th class="sunday">일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // DOMContentLoaded를 사용하여 HTML 구조 로드 완료 후 스크립트 실행을 보장
         document.addEventListener('DOMContentLoaded', () => {
             
             // ----------------------------------------------------
-            // [1] 전역 상수 및 데이터 설정
+            // [1] 데이터 설정 (KvK 연대기 기준 - 모든 시간은 시작 시간)
             // ----------------------------------------------------
-            const KST_OFFSET = ":00 +09:00"; 
-            const KVK_YEAR = '2025'; // 연도 고정
-
-            const RECURRING_EVENTS = [
-                ["폐허", "2025-12-11 00:10", 40, 28], 
-                ["제단", "2025-12-22 00:10", 86, 10], 
-            ];
-            
-            const CHRONOLOGY_PHASES = [
-                ["첫걸음", "12-05 12:30", "Phase"],
-                ["원정군 주둔지 개방", "12-06 00:30", "Fixed"],
-                ["눈에는 눈", "12-07 12:30", "Phase"],
-                ["진영 요새 개방", "12-08 00:30", "Fixed"],
-                ["요지의 전쟁", "12-08 12:30", "Phase"], // 12월 8일 시작 (현재 12월 9일 진행 중)
-                ["협력", "12-10 12:30", "Phase"], // 12월 10일 시작 (다음 연대기)
-                ["폐허 오픈 시작", "12-11 00:30", "Fixed"], 
-                ["징벌", "12-11 12:30", "Phase"],
-                ["복수 (카드집 +1)", "12-13 12:30", "Phase"],
-                ["4관문 일부 개방", "12-14 00:30", "Pass"], 
-                ["먹구름 (군단 +1)", "12-14 12:30", "Phase"],
-                ["늑대와 왕", "12-15 12:30", "Phase"],
-                ["신전 개방", "12-16 00:30", "Fixed"],
-                ["순례", "12-17 12:30", "Phase"],
-                ["5관문 일부 개방", "12-18 00:30", "Pass"], 
-                ["전진", "12-18 12:30", "Phase"],
-                ["성전 개방", "12-19 00:30", "Fixed"],
-                ["성전 점령 (군단 +1)", "12-19 12:30", "Phase"],
-                ["6관문 일부 개방", "12-20 00:30", "Pass"], 
-                ["접전 허가", "12-21 12:30", "Phase"],
-                ["제단 오픈 시작", "12-22 00:30", "Fixed"], 
-                ["희생자 (12야도)", "12-22 12:30", "Phase"],
-                ["갈등과 분쟁", "12-24 12:30", "Phase"],
-                ["단합의 장 (KvK 종료)", "12-26 12:30", "Phase"] 
-            ];
-            
-            // ----------------------------------------------------
-            // [2] 유틸리티 함수
-            // ----------------------------------------------------
-            function parseDate(dateStr) {
-                let dateToParse = dateStr;
-                if (dateStr.length < 11) { 
-                    dateToParse = KVK_YEAR + "-" + dateStr;
-                }
-                return new Date(dateToParse + KST_OFFSET);
-            }
-
-            function formatTimeRemaining(ms) {
-                if (ms < 0) return `<span class="passed">이미 시작됨</span>`;
-                
-                const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-                
-                const format = (n) => String(n).padStart(2, '0');
-                
-                if (days > 0) {
-                    return `${days}일 ${format(hours)}:${format(minutes)}:${format(seconds)}`;
-                } else {
-                    return `${format(hours)}:${format(minutes)}:${format(seconds)}`;
-                }
-            }
-
-            // ----------------------------------------------------
-            // [3] 핵심 로직: 연대기 상태 계산 및 표시
-            // ----------------------------------------------------
-            function getChronologyStatus(currentTime) {
-                const chronologyStatusElement = document.getElementById('chronology-status');
-                let currentPhase = 'KvK 시작 전';
-                let nextPhase = null;
-                let nextPhaseTime = null;
-                let lastPhaseTitle = ''; 
-
-                for (let i = 0; i < CHRONOLOGY_PHASES.length; i++) {
-                    const [title, startTimeStr, type] = CHRONOLOGY_PHASES[i]; 
-                    const startTime = parseDate(startTimeStr);
-
-                    if (currentTime >= startTime.getTime()) {
-                        lastPhaseTitle = title;
-                    } else {
-                        if (!nextPhase) {
-                            nextPhase = title;
-                            nextPhaseTime = startTime;
-                        }
-                    }
-                }
-                
-                // 현재 진행 중인 연대기 설정 (Dec 9th: 요지의 전쟁)
-                if (lastPhaseTitle) {
-                    currentPhase = lastPhaseTitle;
-                }
-
-                const lastEventTime = parseDate(CHRONOLOGY_PHASES[CHRONOLOGY_PHASES.length - 1][1]);
-                
-                // KvK 종료 시점 도달
-                if (currentTime >= lastEventTime.getTime()) {
-                    chronologyStatusElement.innerHTML = `<h3>현재 연대기</h3><div class="status-item"><p class="time-left passed">KvK가 모두 종료되었습니다.</p></div>`;
-                    return;
-                }
-                
-                // 다음 이벤트가 없으면 (현재 단합의 장 연대기 진행 중)
-                if (!nextPhase) {
-                    nextPhase = 'KvK 최종 종료';
-                    nextPhaseTime = lastEventTime;
-                }
-                
-                const timeRemainingMs = nextPhaseTime.getTime() - currentTime.getTime();
-
-                chronologyStatusElement.innerHTML = `
-                    <div class="status-item">
-                        <h3>현재 연대기</h3>
-                        <p class="time-left" style="font-size: 1.2em; color: #8af7a0;">${currentPhase}</p>
-                    </div>
-                    <div class="status-item">
-                        <h3>'${nextPhase}' 시작까지</h3>
-                        <p class="time-left" style="color: #ffcc00;">${formatTimeRemaining(timeRemainingMs)}</p>
-                        <p class="next-time">시작 시각: ${nextPhaseTime.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute:
+            const KVK_EVENTS = [
+                // [날짜 (YYYY-MM-DD), 이벤트 이름, 타입]
+                // 타입: Phase, Pass, Major, Fixed
+                ["2025-12-05", "첫걸음 시작", "Phase"],
+                ["2025-12-06", "원정군 주둔지 개방", "Fixed"],
+                ["2025-12-07", "눈에는 눈 시작", "Phase"],
+                ["2025-12-08", "진영 요새 개방", "Fixed"],
+                ["2025-12-08", "요지의 전쟁 시작", "Phase"], 
+                ["2025-12-10", "협력 시작", "Phase"],
+                ["2025-12-11", "폐허 오픈 시작", "Major"], 
+                ["2025-12-11", "징벌 시작", "Phase"],
+                ["2025-12-13", "복수 시작", "Phase"],
+                ["2025-12-14", "4관문 일부 개방", "Pass"], 
+                ["2025-12-14", "먹구름 시작", "Phase"],
+                ["2025-12-15", "늑대와 왕 시작", "Phase"],
+                ["2025-12-16", "신전 개방", "Fixed"],
+                ["2025-12-17", "순례 시작", "Phase"],
+                ["2025-12-18", "5관문 일부 개방", "Pass"], 
+                ["2025-12-18", "전진 시작", "Phase"],
+                ["2025-12-19", "성전 개방", "Fixed"],
+                ["2025-12-19", "성전 점령 시작", "Phase"],
+                ["2025-12-20", "6관문 일부 개방", "Pass"], 
+                ["2025-12-21", "접전 허가 시작", "Phase"],
+                ["2025-12-22", "제단 오픈 시작", "Major"], 
+                ["2025-12-22", "희생자 시작", "Phase"],
+                ["2025
