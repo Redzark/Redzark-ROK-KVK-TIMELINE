@@ -128,4 +128,55 @@
         </div>
 
         <div class="section-title">🕒 폐허/제단 실시간 카운트다운</div>
-        <div class="count-grid" id="
+        <div class="count-grid" id="timer-container"></div>
+        
+        <div id="loading-msg">로딩중... 화면이 안 뜨면 새로고침 해주세요.</div>
+    </div>
+
+    <script>
+        // [수정된 핵심 함수] 날짜 파싱 에러 방지
+        function safeParseDate(str) {
+            if (!str) return new Date();
+            
+            // 공백을 기준으로 날짜와 시간을 나눔
+            var parts = str.split(' ');
+            var dateStr = parts[0];
+            var timeStr = parts[1] || "00:00"; // 시간이 없으면 00:00으로 강제 설정 (에러 해결)
+
+            var dateParts = dateStr.split('-');
+            var timeParts = timeStr.split(':');
+
+            // 월은 0부터 시작하므로 -1
+            return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+        }
+
+        // --- 데이터 설정 ---
+        var RECURRING = [
+            { name: "폐허", start: "2025-12-11 00:10", interval: 40, max: 28 },
+            { name: "제단", start: "2025-12-22 00:10", interval: 86, max: 10 }
+        ];
+
+        var CALENDAR_EVENTS = [
+            { date: "2025-12-05", name: "첫걸음", type: "type-phase" },
+            { date: "2025-12-06", name: "원정군 주둔지", type: "type-fixed" },
+            { date: "2025-12-07", name: "눈에는 눈", type: "type-phase" },
+            { date: "2025-12-08", name: "진영 요새", type: "type-fixed" },
+            { date: "2025-12-08", name: "요지의 전쟁", type: "type-phase" },
+            { date: "2025-12-10", name: "협력", type: "type-phase" },
+            { date: "2025-12-11", name: "폐허 오픈 시작", type: "type-major" },
+            { date: "2025-12-11", name: "징벌", type: "type-phase" },
+            { date: "2025-12-13", name: "복수", type: "type-phase" },
+            { date: "2025-12-14", name: "4관문 개방", type: "type-fixed" },
+            { date: "2025-12-14", name: "먹구름", type: "type-phase" },
+            { date: "2025-12-15", name: "늑대와 왕", type: "type-phase" },
+            { date: "2025-12-16", name: "신전 개방", type: "type-fixed" },
+            { date: "2025-12-17", name: "순례", type: "type-phase" },
+            { date: "2025-12-18", name: "5관문 개방", type: "type-fixed" },
+            { date: "2025-12-18", name: "전진", type: "type-phase" },
+            { date: "2025-12-19", name: "성전 개방", type: "type-fixed" },
+            { date: "2025-12-19", name: "성전 점령", type: "type-phase" },
+            { date: "2025-12-20", name: "6관문 개방", type: "type-fixed" },
+            { date: "2025-12-21", name: "접전 허가", type: "type-phase" },
+            { date: "2025-12-22", name: "제단 오픈 시작", type: "type-major" },
+            { date: "2025-12-22", name: "희생자", type: "type-phase" },
+            { date: "2025-12-24
