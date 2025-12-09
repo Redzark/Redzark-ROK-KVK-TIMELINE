@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KvK 신기묘산 타이머 | 1689</title>
     <style>
-        /* CSS 스타일 시작 */
+        /* CSS 스타일 시작 (디자인 유지) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #16182a; /* 더 진한 배경 */
+            background-color: #16182a; 
             color: #ffffff;
             margin: 0;
             padding: 30px 10px;
@@ -19,7 +19,7 @@
             margin: 0 auto;
         }
         h1 {
-            color: #ff3859; /* 타이틀 색상 강조 */
+            color: #ff3859; 
             margin-bottom: 5px;
             font-size: 2.2em;
         }
@@ -43,7 +43,7 @@
             padding: 0 10px;
         }
         .status-item h3 {
-            color: #ffcc00; /* 황금색 강조 */
+            color: #ffcc00; 
             margin: 0 0 5px 0;
             font-size: 1.2em;
         }
@@ -94,7 +94,7 @@
         }
         .cycle-info {
             font-size: 0.9em;
-            color: #ff8c00; /* 회차 강조 */
+            color: #ff8c00; 
             font-weight: 600;
             margin-top: 5px;
         }
@@ -113,7 +113,7 @@
         <div class="status-header" id="chronology-status">
             </div>
 
-        <div class="section-title">🔑 주요 이벤트 및 관문 오픈까지 남은 시간</div>
+        <div class="section-title">🔑 다음 관문 오픈 및 주요 이벤트까지 남은 시간</div>
         <div class="event-grid" id="countdown-grid-fixed">
             </div>
 
@@ -127,42 +127,46 @@
         
         // --- 1. 이벤트 데이터 설정 ---
         const KST_OFFSET = ":00 +09:00"; 
-
+        
         // 1-A. 반복 이벤트 목록 (폐허/제단)
         const RECURRING_EVENTS = [
             // [이름, 첫 시작 시각 (YYYY-MM-DD HH:MM), 주기 (시간), 총 횟수]
+            // 모든 연대기 날짜의 기준이 되는 연도를 여기서 가져옵니다.
             ["폐허", "2025-12-11 00:10", 40, 28], 
             ["제단", "2025-12-22 00:10", 86, 10], 
         ];
+        
+        // 연대기 날짜를 고정하기 위해 첫 반복 이벤트의 연도를 추출합니다.
+        const KVK_YEAR = RECURRING_EVENTS[0][1].substring(0, 4); 
 
-        // 1-B. 연대기 전체 목록 및 주요 고정 이벤트 (테이블 기반)
+
+        // 1-B. 연대기 전체 목록 및 주요 고정 이벤트 (모든 시간은 '시작 시간')
         const CHRONOLOGY_PHASES = [
-            // [이름, 완료 시각 (MM-DD HH:MM), 타입]
-            ["첫걸음", "12-05 12:30", "End"],
+            // [이름, 시작 시각 (MM-DD HH:MM), 타입]
+            ["첫걸음", "12-05 12:30", "Phase"],
             ["원정군 주둔지 개방", "12-06 00:30", "Fixed"],
-            ["눈에는 눈", "12-07 12:30", "End"],
+            ["눈에는 눈", "12-07 12:30", "Phase"],
             ["진영 요새 개방", "12-08 00:30", "Fixed"],
-            ["요지의 전쟁", "12-08 12:30", "End"],
-            ["협력", "12-10 12:30", "End"],
+            ["요지의 전쟁", "12-08 12:30", "Phase"],
+            ["협력", "12-10 12:30", "Phase"],
             ["폐허 오픈 시작", "12-11 00:30", "Fixed"], 
-            ["징벌", "12-11 12:30", "End"],
-            ["복수 (카드집 +1)", "12-13 12:30", "End"],
-            ["4관문 일부 개방", "12-14 00:30", "Pass"], // 주요 이벤트
-            ["먹구름 (군단 +1)", "12-14 12:30", "End"],
-            ["늑대와 왕", "12-15 12:30", "End"],
+            ["징벌", "12-11 12:30", "Phase"],
+            ["복수 (카드집 +1)", "12-13 12:30", "Phase"],
+            ["4관문 일부 개방", "12-14 00:30", "Pass"], 
+            ["먹구름 (군단 +1)", "12-14 12:30", "Phase"],
+            ["늑대와 왕", "12-15 12:30", "Phase"],
             ["신전 개방", "12-16 00:30", "Fixed"],
-            ["순례", "12-17 12:30", "End"],
-            ["5관문 일부 개방", "12-18 00:30", "Pass"], // 주요 이벤트
-            ["전진", "12-18 12:30", "End"],
+            ["순례", "12-17 12:30", "Phase"],
+            ["5관문 일부 개방", "12-18 00:30", "Pass"], 
+            ["전진", "12-18 12:30", "Phase"],
             ["성전 개방", "12-19 00:30", "Fixed"],
-            ["성전 점령 (군단 +1)", "12-19 12:30", "End"],
-            ["6관문 일부 개방", "12-20 00:30", "Pass"], // 주요 이벤트
-            ["접전 허가", "12-21 12:30", "End"],
+            ["성전 점령 (군단 +1)", "12-19 12:30", "Phase"],
+            ["6관문 일부 개방", "12-20 00:30", "Pass"], 
+            ["접전 허가", "12-21 12:30", "Phase"],
             ["제단 오픈 시작", "12-22 00:30", "Fixed"], 
-            ["희생자 (12야도)", "12-22 12:30", "End"],
-            // 7관문 요청에 따라 삭제됨
-            ["갈등과 분쟁", "12-24 12:30", "End"],
-            ["단합의 장 (KvK 종료)", "12-26 12:30", "End"]
+            ["희생자 (12야도)", "12-22 12:30", "Phase"],
+            ["갈등과 분쟁", "12-24 12:30", "Phase"],
+            ["단합의 장 (KvK 종료)", "12-26 12:30", "Phase"] 
         ];
 
         const gridRecurring = document.getElementById('countdown-grid-recurring');
@@ -170,16 +174,19 @@
         const chronologyStatusElement = document.getElementById('chronology-status');
         
         // --- 2. 시간 계산 유틸리티 함수 ---
+        // KVK_YEAR를 사용하여 모든 날짜를 동일한 연도에 고정합니다.
         function parseDate(dateStr) {
-            const currentYear = new Date().getFullYear();
-            if (dateStr.length < 11) {
-                dateStr = currentYear + "-" + dateStr;
+            let dateToParse = dateStr;
+            // dateStr이 'MM-DD HH:MM' 형태일 경우, KVK_YEAR를 붙임
+            if (dateStr.length < 11) { 
+                dateToParse = KVK_YEAR + "-" + dateStr;
             }
-            return new Date(dateStr + KST_OFFSET);
+            return new Date(dateToParse + KST_OFFSET);
         }
 
+        // 남은 시간을 D일 HH:MM:SS 형식으로 변환
         function formatTimeRemaining(ms) {
-            if (ms < 0) return `<span class="passed">시간 초과</span>`;
+            if (ms < 0) return `<span class="passed">이미 시작됨</span>`;
             
             const days = Math.floor(ms / (1000 * 60 * 60 * 24));
             const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -195,54 +202,59 @@
             }
         }
 
-        // --- 3. 연대기 상태 계산 및 표시 함수 ---
+        // --- 3. 연대기 상태 계산 및 표시 함수 (현재 진행 중인 연대기 추적) ---
         function getChronologyStatus(currentTime) {
-            let currentPhase = 'KvK 대기 중 또는 시작 전';
+            let currentPhase = 'KvK 대기 중';
             let nextPhase = null;
             let nextPhaseTime = null;
             let foundNext = false;
+            let lastPhaseTitle = ''; // 가장 최근에 시작된 연대기 이름
 
             for (let i = 0; i < CHRONOLOGY_PHASES.length; i++) {
-                const [title, endTimeStr, type] = CHRONOLOGY_PHASES[i];
-                const endTime = parseDate(endTimeStr);
+                const [title, startTimeStr, type] = CHRONOLOGY_PHASES[i]; 
+                const startTime = parseDate(startTimeStr);
 
-                if (currentTime < endTime.getTime()) {
-                    // 다음 연대기 시작 시점 찾음
+                if (currentTime >= startTime.getTime()) {
+                    // 현재 시간이 이벤트 시작 시간보다 같거나 늦으면, 이 이벤트가 현재 활성 상태
+                    lastPhaseTitle = title;
+                } else {
+                    // 현재 시간이 이벤트 시작 시간보다 빠르면, 이 이벤트가 다음 이벤트
                     if (!foundNext) {
                         nextPhase = title;
-                        nextPhaseTime = endTime;
+                        nextPhaseTime = startTime;
                         foundNext = true;
+                        break; 
                     }
-                    if (i > 0) {
-                        // 현재 진행 중인 연대기를 찾기 위해 이전 연대기 타이틀 사용
-                        const previousPhaseTime = parseDate(CHRONOLOGY_PHASES[i-1][1]);
-                        if (currentTime >= previousPhaseTime.getTime()) {
-                            currentPhase = CHRONOLOGY_PHASES[i-1][0];
-                        }
-                    }
-                    
-                } else {
-                    // 이미 지난 연대기
-                    currentPhase = title; 
                 }
             }
+            
+            // 가장 최근에 시작된 이벤트를 현재 진행 중인 연대기로 설정
+            if (lastPhaseTitle) {
+                 currentPhase = lastPhaseTitle;
+            }
 
-            if (!nextPhaseTime) {
+            if (!foundNext && currentPhase === CHRONOLOGY_PHASES[CHRONOLOGY_PHASES.length - 1][0]) {
+                // KvK 종료 이벤트까지 시작되었고 그 이후의 이벤트가 없으면 KvK 종료
                 chronologyStatusElement.innerHTML = `<h3>현재 KvK 상태</h3><div class="status-item"><p class="time-left passed">KvK가 모두 종료되었습니다.</p></div>`;
                 return;
+            }
+            
+            if (!foundNext) {
+                // KvK가 종료 단계에 있지만, 현재 코드에서는 이 경우가 발생하지 않도록 설계됨
+                return; 
             }
 
             const timeRemainingMs = nextPhaseTime.getTime() - currentTime.getTime();
 
             chronologyStatusElement.innerHTML = `
                 <div class="status-item">
-                    <h3>현재 연대기</h3>
-                    <p class="time-left" style="font-size: 1.2em; color: #8af7a0;">${currentPhase} 중</p>
+                    <h3>현재 진행 중인 연대기</h3>
+                    <p class="time-left" style="font-size: 1.2em; color: #8af7a0;">${currentPhase}</p>
                 </div>
                 <div class="status-item">
-                    <h3>'${nextPhase}' 종료까지</h3>
+                    <h3>'${nextPhase}' 시작까지</h3>
                     <p class="time-left" style="color: #ffcc00;">${formatTimeRemaining(timeRemainingMs)}</p>
-                    <p class="next-time">종료 시각: ${nextPhaseTime.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p>
+                    <p class="next-time">시작 시각: ${nextPhaseTime.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p>
                 </div>
             `;
         }
@@ -268,6 +280,15 @@
                 
                 if (cycleNumber > totalCycles) {
                     cycleInfo = `[ 모든 회차 완료 ]`;
+                    htmlContent += `
+                        <div class="event-card">
+                            <div class="event-title">${title}</div>
+                            <div class="cycle-info">${cycleInfo}</div>
+                            <div class="countdown passed">종료됨</div>
+                            <div class="next-time"></div>
+                        </div>
+                    `;
+                    return; // 완료된 이벤트는 여기서 종료
                 }
 
                 const countdownHTML = `<div class="countdown">${formatTimeRemaining(timeDifference)}</div>`;
@@ -286,36 +307,37 @@
             gridRecurring.innerHTML = htmlContent;
         }
 
-        // --- 5. 고정 이벤트 카운트다운 계산 및 표시 함수 ---
+        // --- 5. 고정 이벤트 카운트다운 계산 및 표시 함수 (앞으로 다가올 주요 이벤트만 표시) ---
         function updateFixedEvents(currentTime) {
             let htmlContent = '';
             
-            // Pass 이벤트와 주요 Fixed 이벤트만 필터링하여 표시
-            const fixedEvents = CHRONOLOGY_PHASES.filter(
-                ([title, endTimeStr, type]) => type === 'Pass' || (type === 'Fixed' && currentTime < parseDate(endTimeStr).getTime())
+            // 'Pass' 이벤트(관문)와 'Fixed' 이벤트 중, 아직 시작하지 않은 이벤트만 필터링
+            const upcomingFixedEvents = CHRONOLOGY_PHASES.filter(
+                ([title, startTimeStr, type]) => (type === 'Pass' || type === 'Fixed') && currentTime < parseDate(startTimeStr).getTime()
             ); 
 
-            fixedEvents.slice(0, 5).forEach(([title, endTimeStr, type]) => {
-                const endTime = parseDate(endTimeStr);
-                const timeDifference = endTime.getTime() - currentTime.getTime();
+            // 다가올 5개 이벤트만 표시
+            upcomingFixedEvents.slice(0, 5).forEach(([title, startTimeStr, type]) => {
+                const startTime = parseDate(startTimeStr);
+                const timeDifference = startTime.getTime() - currentTime.getTime();
                 
-                let countdownHTML = '';
-                if (timeDifference < 0) {
-                    countdownHTML = `<div class="countdown passed">완료됨</div>`;
-                } else {
-                    countdownHTML = `<div class="countdown">${formatTimeRemaining(timeDifference)}</div>`;
-                }
+                const countdownHTML = `<div class="countdown">${formatTimeRemaining(timeDifference)}</div>`;
                 
                 htmlContent += `
                     <div class="event-card">
                         <div class="event-title">${title}</div>
                         ${countdownHTML}
-                        <div class="next-time">예정 시각: ${endTime.toLocaleString('ko-KR', { 
+                        <div class="next-time">예정 시각: ${startTime.toLocaleString('ko-KR', { 
                             month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false 
                         })}</div>
                     </div>
                 `;
             });
+            
+            if (upcomingFixedEvents.length === 0) {
+                htmlContent = `<p style="color:#aaa; padding: 20px;">모든 주요 관문/고정 이벤트가 열렸습니다.</p>`;
+            }
+            
             gridFixed.innerHTML = htmlContent;
         }
 
@@ -329,7 +351,7 @@
         }
 
         updateDashboard();
-        setInterval(updateDashboard, 1000); // 1초마다 갱신
+        setInterval(updateDashboard, 1000); 
         // JavaScript 코드 끝
     </script>
 </body>
