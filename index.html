@@ -28,6 +28,7 @@
             font-size: 1.2em;
             margin-bottom: 25px;
         }
+        
         /* --- 달력 스타일 --- */
         #calendar-container {
             background-color: #2a2a4a;
@@ -41,58 +42,10 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
+            min-width: 600px; /* 모바일에서 깨짐 방지 */
         }
         .calendar th {
             background-color: #33395b;
             color: #ffcc00;
             padding: 10px 0;
-            font-size: 1.1em;
-            border: 1px solid #3a3a5a;
-        }
-        .calendar td {
-            height: 100px;
-            border: 1px solid #3a3a5a;
-            padding: 5px;
-            vertical-align: top;
-            text-align: left;
-        }
-        .day-number {
-            font-size: 1.5em;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 2px; /* 간격 조정 */
-            color: #fff;
-        }
-        .sunday { color: #ff5757; }
-        .saturday { color: #8af7a0; }
-        
-        /* [수정됨] 오늘 날짜 스타일: 초록 배경 제거, 테두리만 유지 */
-        .today {
-            background-color: #2f2f55 !important; /* 아주 살짝 밝은 배경 */
-            border: 2px solid #ffcc00 !important; /* 노란색 테두리 강조 */
-        }
-        
-        /* [추가됨] "오늘" 텍스트 스타일 */
-        .today-text {
-            display: block;
-            color: #ffcc00; /* 황금색 */
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            text-align: left; /* 숫자와 같이 왼쪽 정렬 */
-        }
-
-        .event-label {
-            font-size: 0.75em;
-            display: block;
-            padding: 2px 4px;
-            margin-top: 2px;
-            border-radius: 3px;
-            line-height: 1.2;
-            font-weight: 500;
-            text-align: center;
-        }
-        .event-phase { background-color: #555; color: #fff; }
-        .event-major { background-color: #ff8c00; color: #fff; }
-
-        /* --- 카운트
+            font-size: 1.
