@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1689서버 신기묘산 KVK 타임라인</title>
     <style>
-        /* CSS 스타일 시작 (디자인 유지) */
+        /* CSS 스타일 시작 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #16182a; 
@@ -61,8 +61,6 @@
             border-bottom: 2px solid #33395b;
             padding-bottom: 5px;
         }
-
-        /* 이벤트 카드 그리드 */
         .event-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -110,35 +108,30 @@
         <h1>1689서버 신기묘산 KVK 타임라인</h1> 
         <h2>[ KvK 신기묘산 | 서버 1689 ]</h2>
         
-        <div class="status-header" id="chronology-status">
-            </div>
+        <div class="status-header" id="chronology-status"></div>
 
         <div class="section-title">🔑 다음 관문 오픈 및 주요 이벤트까지 남은 시간</div>
-        <div class="event-grid" id="countdown-grid-fixed">
-            </div>
+        <div class="event-grid" id="countdown-grid-fixed"></div>
 
         <div class="section-title">🔁 반복 이벤트 남은 시간 (회차 표시)</div>
-        <div class="event-grid" id="countdown-grid-recurring">
-            </div>
+        <div class="event-grid" id="countdown-grid-recurring"></div>
     </div>
 
     <script>
         // JavaScript 코드 시작
         
         // ----------------------------------------------------
-        // [1] 전역 상수 및 데이터 설정
+        // [1] 전역 상수 및 데이터 설정 (안정화)
         // ----------------------------------------------------
         const KST_OFFSET = ":00 +09:00"; 
-        
-        // 1-A. 반복 이벤트 목록 (폐허/제단)
+        const KVK_YEAR = '2025'; // 연도 고정
+
+        // 1-A. 반복 이벤트 목록 
         const RECURRING_EVENTS = [
             // [이름, 첫 시작 시각 (YYYY-MM-DD HH:MM), 주기 (시간), 총 횟수]
             ["폐허", "2025-12-11 00:10", 40, 28], 
             ["제단", "2025-12-22 00:10", 86, 10], 
         ];
-        
-        // 연대기 날짜 고정용 연도 추출 (2025)
-        const KVK_YEAR = RECURRING_EVENTS[0][1].substring(0, 4); 
 
         // 1-B. 연대기 전체 목록 및 주요 고정 이벤트 (모든 시간은 '시작 시간')
         const CHRONOLOGY_PHASES = [
@@ -168,29 +161,19 @@
             ["갈등과 분쟁", "12-24 12:30", "Phase"],
             ["단합의 장 (KvK 종료)", "12-26 12:30", "Phase"] 
         ];
-
-        
-        // ----------------------------------------------------
-        // [2] DOM 요소 정의
-        // ----------------------------------------------------
-        const gridRecurring = document.getElementById('countdown-grid-recurring');
-        const gridFixed = document.getElementById('countdown-grid-fixed');
-        const chronologyStatusElement = document.getElementById('chronology-status');
-
         
         // ----------------------------------------------------
         // [3] 시간 계산 유틸리티 함수
         // ----------------------------------------------------
-        // KVK_YEAR를 사용하여 모든 날짜를 동일한 연도에 고정합니다.
         function parseDate(dateStr) {
             let dateToParse = dateStr;
+            // 'MM-DD HH:MM' 형태일 경우, KVK_YEAR를 붙여 'YYYY-MM-DD HH:MM'로 만듦
             if (dateStr.length < 11) { 
                 dateToParse = KVK_YEAR + "-" + dateStr;
             }
             return new Date(dateToParse + KST_OFFSET);
         }
 
-        // 남은 시간을 D일 HH:MM:SS 형식으로 변환
         function formatTimeRemaining(ms) {
             if (ms < 0) return `<span class="passed">이미 시작됨</span>`;
             
@@ -209,9 +192,11 @@
         }
 
         // ----------------------------------------------------
-        // [4] 핵심 로직: 연대기 상태 계산 및 표시 함수 (현재 진행 중인 연대기 추적)
+        // [4] 핵심 로직: 연대기 상태 계산 및 표시 함수
         // ----------------------------------------------------
         function getChronologyStatus(currentTime) {
+            const chronologyStatusElement = document.getElementById('chronology-status');
+
             let currentPhase = 'KvK 시작 전';
             let nextPhase = null;
             let nextPhaseTime = null;
@@ -231,19 +216,17 @@
                 }
             }
             
-            // 현재 진행 중인 연대기를 설정
             if (lastPhaseTitle) {
                  currentPhase = lastPhaseTitle;
             }
 
-            // KvK 종료 상태 체크 (마지막 이벤트 시작 시간 이후인지 확인)
             const lastEventTime = parseDate(CHRONOLOGY_PHASES[CHRONOLOGY_PHASES.length - 1][1]);
+            
             if (currentTime >= lastEventTime.getTime()) {
                  chronologyStatusElement.innerHTML = `<h3>현재 연대기</h3><div class="status-item"><p class="time-left passed">KvK가 모두 종료되었습니다.</p></div>`;
                  return;
             }
             
-            // 다음 이벤트가 없으면 마지막 이벤트 시간을 사용 (종료 카운트다운)
             if (!nextPhase) {
                 nextPhase = 'KvK 최종 종료';
                 nextPhaseTime = lastEventTime;
@@ -268,6 +251,7 @@
         // [5] 핵심 로직: 반복 이벤트 카운트다운
         // ----------------------------------------------------
         function updateRecurringEvents(currentTime) {
+            const gridRecurring = document.getElementById('countdown-grid-recurring');
             let htmlContent = '';
 
             RECURRING_EVENTS.forEach(([title, startTimeStr, recurrenceHours, totalCycles], index) => {
@@ -275,6 +259,96 @@
                 const recurrenceMs = recurrenceHours * 60 * 60 * 1000;
                 let cycle = 0;
                 
-                // 현재 회차 계산
                 while (nextTime.getTime() < currentTime.getTime()) {
                     nextTime = new Date(nextTime.getTime() + recurrenceMs);
+                    cycle++;
+                }
+                
+                const timeDifference = nextTime.getTime() - currentTime.getTime();
+                const cycleNumber = cycle + 1;
+                let cycleInfo = `[ ${cycleNumber}회차 / 총 ${totalCycles}회 ]`;
+                
+                if (cycleNumber > totalCycles) {
+                    cycleInfo = `[ 모든 회차 완료 ]`;
+                    htmlContent += `
+                        <div class="event-card">
+                            <div class="event-title">${title}</div>
+                            <div class="cycle-info">${cycleInfo}</div>
+                            <div class="countdown passed">종료됨</div>
+                            <div class="next-time"></div>
+                        </div>
+                    `;
+                    return; 
+                }
+
+                const countdownHTML = `<div class="countdown">${formatTimeRemaining(timeDifference)}</div>`;
+                
+                htmlContent += `
+                    <div class="event-card">
+                        <div class="event-title">${title}</div>
+                        <div class="cycle-info">${cycleInfo}</div>
+                        ${countdownHTML}
+                        <div class="next-time">다음 오픈: ${nextTime.toLocaleString('ko-KR', { 
+                            month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false 
+                        })}</div>
+                    </div>
+                `;
+            });
+            gridRecurring.innerHTML = htmlContent;
+        }
+
+        // ----------------------------------------------------
+        // [6] 핵심 로직: 고정 이벤트 카운트다운 (다가올 이벤트만)
+        // ----------------------------------------------------
+        function updateFixedEvents(currentTime) {
+            const gridFixed = document.getElementById('countdown-grid-fixed');
+            let htmlContent = '';
+            
+            // 'Pass' 이벤트(관문)와 'Fixed' 이벤트 중, 아직 시작하지 않은 이벤트만 필터링
+            const upcomingFixedEvents = CHRONOLOGY_PHASES.filter(
+                ([title, startTimeStr, type]) => (type === 'Pass' || type === 'Fixed') && currentTime < parseDate(startTimeStr).getTime()
+            ); 
+
+            // 다가올 5개 이벤트만 표시
+            upcomingFixedEvents.slice(0, 5).forEach(([title, startTimeStr, type]) => {
+                const startTime = parseDate(startTimeStr);
+                const timeDifference = startTime.getTime() - currentTime.getTime();
+                
+                const countdownHTML = `<div class="countdown">${formatTimeRemaining(timeDifference)}</div>`;
+                
+                htmlContent += `
+                    <div class="event-card">
+                        <div class="event-title">${title}</div>
+                        ${countdownHTML}
+                        <div class="next-time">예정 시각: ${startTime.toLocaleString('ko-KR', { 
+                            month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false 
+                        })}</div>
+                    </div>
+                `;
+            });
+            
+            if (upcomingFixedEvents.length === 0) {
+                htmlContent = `<p style="color:#aaa; padding: 20px;">모든 주요 관문/고정 이벤트가 열렸습니다.</p>`;
+            }
+            
+            gridFixed.innerHTML = htmlContent;
+        }
+
+
+        // ----------------------------------------------------
+        // [7] 메인 업데이트 루프
+        // ----------------------------------------------------
+        function updateDashboard() {
+            const currentTime = new Date();
+            getChronologyStatus(currentTime);
+            updateRecurringEvents(currentTime);
+            updateFixedEvents(currentTime);
+        }
+
+        // 초기 실행 및 1초마다 갱신
+        updateDashboard();
+        setInterval(updateDashboard, 1000); 
+        // JavaScript 코드 끝
+    </script>
+</body>
+</html>
