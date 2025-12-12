@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KVK 1689 STRATEGIC MAP</title>
+<title>KVK 1689 WAR ROOM</title>
 <style>
     /* === 기본 스타일 === */
-    body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; text-align: center; }
+    body { background-color: #0f1215; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
     h1 { color: #ffb74d; font-size: 1.5rem; margin: 5px 0; letter-spacing: 1px; }
     .sub { color: #888; font-size: 0.85rem; margin-bottom: 15px; }
     
     #clock-box { 
-        background: #1e1e1e; border: 1px solid #333; 
-        padding: 6px 12px; border-radius: 15px; 
+        background: #1e2328; border: 1px solid #333; 
+        padding: 6px 15px; border-radius: 20px; 
         display: inline-block; margin-bottom: 15px; 
         font-family: monospace; font-size: 0.85rem; color: #bbb;
     }
@@ -20,119 +20,117 @@
     .wrap { max-width: 700px; margin: 0 auto; text-align: left; }
 
     /* === 1. 외교 (Diplomacy) === */
-    .diplomacy-section { background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 12px; margin-bottom: 15px; }
-    .card-t { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 6px; margin-bottom: 10px; display: block; font-size: 1rem; color: #66bb6a; }
+    .diplomacy-section { background: #1e2328; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+    .card-t { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 10px; display: block; font-size: 1rem; color: #66bb6a; }
     
     .diplo-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .diplo-col { flex: 1; min-width: 250px; }
-    .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin: 2px; color: #fff; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
+    .diplo-col { flex: 1; min-width: 280px; }
+    .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin: 3px 3px 3px 0; color: #fff; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
 
     /* 색상 테마 */
-    .bg-day { background: #f57f17; color: black; }
+    .bg-day { background: #fbc02d; color: #000; }
     .bg-green { background: #2e7d32; }
     .bg-water { background: #1565c0; }
     .bg-fire { background: #c62828; }
-    .bg-earth { background: #4e342e; }
+    .bg-earth { background: #5d4037; }
     .bg-wind { background: #4527a0; }
 
-    /* === 2. 전술 지도 (Advanced Grid) === */
+    /* === 2. 전술 지도 (레이어 구조 구현) === */
     .map-container {
-        position: relative; width: 100%; padding-bottom: 85%; /* 비율 */
-        background: #0d1117; border: 2px solid #444; border-radius: 12px;
+        position: relative; width: 100%; height: 360px; /* 맵 높이 */
+        background: #111; border: 2px solid #444; border-radius: 12px;
         margin-bottom: 20px; overflow: hidden; box-shadow: inset 0 0 50px #000;
     }
 
-    /* 구역 박스 공통 */
+    /* 맵 배경 그리드 */
+    .map-grid {
+        position: absolute; width: 100%; height: 100%; opacity: 0.2;
+        background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    /* [구역 박스] */
     .zone {
-        position: absolute; display: flex; align-items: center; justify-content: center;
-        border-radius: 4px; font-weight: bold; text-align: center;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        color: rgba(255,255,255,0.8); font-size: 0.75rem; flex-direction: column;
+        position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border-radius: 6px; text-align: center; color: #fff; font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; border: 1px solid rgba(255,255,255,0.3);
     }
-    .label-svr { font-size: 0.65rem; opacity: 0.8; margin-top: 2px; font-weight: normal; }
+    .z-name { font-size: 0.85rem; text-shadow: 1px 1px 2px #000; }
+    .z-svr { font-size: 0.65rem; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 3px; margin-top: 2px; }
 
-    /* --- [Zone 4: 스타팅 캠프] --- */
-    .z4 { border: 1px solid rgba(255,255,255,0.2); z-index: 2; width: 22%; height: 20%; }
+    /* 1. 스타팅 존 (4존) - 외곽 */
+    /* 적군 */
+    .z-fire { top: 10px; left: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #b71c1c, #880e4f); border-color: #ef5350; }
+    .z-earth { top: 10px; left: 50%; transform: translateX(-50%); width: 30%; height: 25%; background: linear-gradient(135deg, #4e342e, #3e2723); border-color: #8d6e63; }
+    .z-wind { top: 10px; right: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #311b92, #1a237e); border-color: #7e57c2; }
     
-    /* 적군 (위) */
-    .fire { top: 5%; left: 5%; background: linear-gradient(135deg, #5c1818, #3e1010); border-color: #ef5350; }
-    .earth { top: 5%; left: 39%; background: linear-gradient(135deg, #4e342e, #3e2723); border-color: #8d6e63; }
-    .wind { top: 5%; right: 5%; background: linear-gradient(135deg, #311b92, #1a237e); border-color: #7e57c2; }
-    
-    /* 아군 (아래) */
-    .day { bottom: 5%; left: 5%; background: linear-gradient(135deg, #f57f17, #ef6c00); border-color: #ffca28; color: #000; }
-    .green { bottom: 5%; left: 39%; background: linear-gradient(135deg, #1b5e20, #0d3b10); border-color: #66bb6a; }
-    .water { bottom: 5%; right: 5%; background: linear-gradient(135deg, #01579b, #003c6c); border-color: #42a5f5; }
+    /* 아군 */
+    .z-day { bottom: 10px; left: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #f57f17, #ef6c00); border-color: #ffca28; color: white; }
+    .z-green { bottom: 10px; left: 50%; transform: translateX(-50%); width: 30%; height: 25%; background: linear-gradient(135deg, #1b5e20, #0d3b10); border-color: #66bb6a; }
+    .z-water { bottom: 10px; right: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #01579b, #003c6c); border-color: #42a5f5; }
 
-    /* --- [Zone 5: 수직 연결 (좌우)] --- */
-    .z5 { width: 12%; height: 30%; background: rgba(100, 100, 100, 0.2); border: 1px dashed #555; z-index: 1; }
-    .z5-left { top: 35%; left: 10%; } /* Fire <-> Daybreak 사이 */
-    .z5-right { top: 35%; right: 10%; } /* Wind <-> Water 사이 */
-
-    /* --- [Zone 6: 수평 연결 (위아래)] --- */
-    .z6 { width: 25%; height: 12%; background: rgba(100, 100, 100, 0.2); border: 1px dashed #555; z-index: 1; }
-    /* 아군 사이 (Daybreak <-> Greenwood <-> Water) */
-    .z6-bot-left { bottom: 9%; left: 27%; margin-left: -5px; } 
-    .z6-bot-right { bottom: 9%; right: 27%; margin-right: -5px; }
-    /* 적군 사이 */
-    .z6-top-left { top: 9%; left: 27%; margin-left: -5px; }
-    .z6-top-right { top: 9%; right: 27%; margin-right: -5px; }
-
-    /* --- [Zone 7: 내부 대각선] --- */
-    .z7 { width: 15%; height: 15%; background: rgba(150, 150, 50, 0.15); border: 1px solid #777; z-index: 1; transform: rotate(45deg); }
-    /* Zone 6에서 대각선 안쪽으로 */
-    .z7-bl { bottom: 25%; left: 25%; }
-    .z7-br { bottom: 25%; right: 25%; }
-    .z7-tl { top: 25%; left: 25%; }
-    .z7-tr { top: 25%; right: 25%; }
-
-    /* --- [Kingsland: 중앙] --- */
-    .kl { 
-        top: 50%; left: 50%; transform: translate(-50%, -50%); 
-        width: 20%; height: 20%; border-radius: 50%; 
-        background: rgba(239, 83, 80, 0.15); border: 2px solid #ef5350; 
-        color: #ffb74d; font-weight: bold; z-index: 3;
+    /* 2. 중간 존 (5/6존) - 연결 부위 */
+    .mid-zone-bg {
+        position: absolute; top: 28%; left: 5%; right: 5%; bottom: 28%;
+        border: 2px dashed #444; border-radius: 20px;
+        background: rgba(255,255,255,0.02); pointer-events: none; z-index: 1;
     }
 
-    /* --- [관문 아이콘 (Gate)] --- */
-    .gate { 
-        position: absolute; background: #222; border: 1px solid #fff; 
-        color: #fff; font-size: 0.6rem; padding: 1px 3px; border-radius: 3px; 
-        z-index: 5; font-weight: bold;
+    /* 3. 킹스랜드 (7존 내부) - 정중앙 */
+    .kingsland {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 25%; height: 25%; background: rgba(239, 83, 80, 0.15);
+        border: 2px solid #ef5350; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: #ffb74d; font-weight: bold; font-size: 0.9rem;
+        box-shadow: 0 0 30px rgba(239, 83, 80, 0.3); z-index: 3;
+    }
+
+    /* 4. 관문 (Gate) - 경로 시각화 */
+    .gate {
+        position: absolute; background: #000; color: #fff; border: 1px solid #aaa;
+        font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; z-index: 5; font-weight: bold;
     }
     
-    /* G4: 캠프 탈출구 */
-    .g4-day-top { bottom: 25%; left: 16%; } /* Daybreak 위쪽 */
-    .g4-day-right { bottom: 15%; left: 27%; } /* Daybreak 오른쪽 */
-    
-    /* G5: Z5 진입 */
-    .g5-left { top: 50%; left: 16%; transform: translate(-50%, -50%); }
+    /* G4 (4존 -> 5존) */
+    .g4-l { top: 26%; left: 20%; }
+    .g4-c { top: 26%; left: 50%; transform: translateX(-50%); }
+    .g4-r { top: 26%; right: 20%; }
+    .g4-lb { bottom: 26%; left: 20%; }
+    .g4-cb { bottom: 26%; left: 50%; transform: translateX(-50%); }
+    .g4-rb { bottom: 26%; right: 20%; }
 
-    /* G6: Z6 진입 */
-    .g6-bot-l { bottom: 15%; left: 39%; transform: translateX(-50%); }
+    /* G5/G6 (중간 -> 내부) */
+    .g5-l { top: 40%; left: 30%; }
+    .g5-r { top: 40%; right: 30%; }
+    .g5-lb { bottom: 40%; left: 30%; }
+    .g5-rb { bottom: 40%; right: 30%; }
 
-    /* G7: Z7 진입 (대각선) */
-    .g7-bl { bottom: 32%; left: 32%; } /* KL 근처 */
-
-    /* 화살표 (진격 방향) */
-    .arrow { position: absolute; color: rgba(255,255,255,0.3); font-size: 1rem; z-index: 0; }
-    .arr-ur { bottom: 22%; left: 22%; transform: rotate(-45deg); } /* Day -> Z7 방향 */
+    /* KL 입구 (7존 -> KL) */
+    .kl-gate { top: 50%; left: 35%; transform: translate(-50%, -50%); background: #d32f2f; border-color: #ff5252; }
+    .kl-gate-r { top: 50%; right: 35%; transform: translate(50%, -50%); background: #d32f2f; border-color: #ff5252; }
 
     /* === 공지 & 리스트 === */
-    .sec-box { border: 1px solid #333; border-radius: 8px; background: #1e1e1e; margin-bottom: 10px; overflow: hidden; }
-    .sec-head { padding: 10px 15px; background: #252525; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-left: 4px solid #666; }
+    .sec-box { border: 1px solid #333; border-radius: 8px; background: #1e2328; margin-bottom: 10px; overflow: hidden; }
+    .sec-head { padding: 10px 15px; background: #2c323a; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-left: 4px solid #666; }
     .sec-body { display: none; padding: 10px; border-top: 1px solid #333; }
     .sec-body.open { display: block; }
 
-    .t-num { font-size: 1.4rem; font-weight: bold; font-family: monospace; color: #fff; }
+    .t-num { font-size: 1.4rem; font-weight: bold; font-family: monospace; color: #fff; display: block; }
+    .t-box { background: #121212; padding: 10px; text-align: center; border-radius: 6px; margin-bottom: 5px; border: 1px solid #333; display: none; }
+    
     .row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; font-size: 0.85rem; }
     .row.active { background: rgba(102, 187, 106, 0.15); border-left: 3px solid #66bb6a; }
+    .r-right { text-align: right; font-family: monospace; color: #aaa; font-size: 0.75rem; }
+    
+    .badge { background: #ffb74d; color: #000; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px; font-weight: bold; }
     .copy-btn { background: #333; border: 1px solid #555; color: #ccc; font-size: 0.7rem; cursor: pointer; border-radius: 3px; margin-left: 8px; }
+
 </style>
 </head>
 <body>
 
-    <h1>KVK 1689 DASHBOARD</h1>
+    <h1>KVK 1689 WAR ROOM</h1>
     <div class="sub">Storm of Stratagems (계책의 폭풍)</div>
     <div id="clock-box">Loading...</div>
 
@@ -143,7 +141,7 @@
             <div class="diplo-grid">
                 <div class="diplo-col">
                     <div style="font-size:0.8rem; color:#66bb6a; margin-bottom:5px; font-weight:bold;">🔵 ALLIES (아군)</div>
-                    <div style="line-height:1.8">
+                    <div>
                         <span class="tag bg-day">Daybreak</span>
                         <span class="tag bg-green">Greenwood</span>
                         <span class="tag bg-water">Water</span>
@@ -151,7 +149,7 @@
                 </div>
                 <div class="diplo-col">
                     <div style="font-size:0.8rem; color:#ef5350; margin-bottom:5px; font-weight:bold;">🔴 ENEMIES (적군)</div>
-                    <div style="line-height:1.8">
+                    <div>
                         <span class="tag bg-fire">Fire</span>
                         <span class="tag bg-earth">Earth</span>
                         <span class="tag bg-wind">Wind</span>
@@ -161,48 +159,46 @@
         </div>
 
         <div class="map-container">
+            <div class="map-grid"></div>
+            <div class="mid-zone-bg"></div> <div class="kingsland">KING'S<br>LAND</div>
+
+            <div class="gate g4-l">G4</div>
+            <div class="gate g4-c">G4</div>
+            <div class="gate g4-r">G4</div>
             
-            <div class="zone z4 fire">FIRE<div class="label-svr">1393, 3253</div></div>
-            <div class="zone z4 earth">EARTH<div class="label-svr">2877, 2620</div></div>
-            <div class="zone z4 wind">WIND<div class="label-svr">1486, 1305</div></div>
+            <div class="gate g4-lb">G4</div>
+            <div class="gate g4-cb">G4</div>
+            <div class="gate g4-rb">G4</div>
 
-            <div class="zone z4 day">DAY<br>BREAK<div class="label-svr" style="color:#222">1689, 2334</div></div>
-            <div class="zone z4 green">GREEN<br>WOOD<div class="label-svr">3155, 2238</div></div>
-            <div class="zone z4 water">WATER<div class="label-svr">1206, 3530</div></div>
-
-            <div class="zone z5 z5-left">Z5</div>
-            <div class="zone z5 z5-right">Z5</div>
-
-            <div class="zone z6 z6-top-left">Z6</div>
-            <div class="zone z6 z6-top-right">Z6</div>
-            <div class="zone z6 z6-bot-left">Z6</div>
-            <div class="zone z6 z6-bot-right">Z6</div>
-
-            <div class="zone z7 z7-tl"><span style="transform:rotate(-45deg)">Z7</span></div>
-            <div class="zone z7 z7-tr"><span style="transform:rotate(-45deg)">Z7</span></div>
-            <div class="zone z7 z7-bl"><span style="transform:rotate(-45deg)">Z7</span></div>
-            <div class="zone z7 z7-br"><span style="transform:rotate(-45deg)">Z7</span></div>
-
-            <div class="zone kl">KING'S<br>LAND</div>
-
-            <div class="gate g4-day-top">G4</div>
-            <div class="gate g4-day-right">G4</div>
+            <div class="gate g5-l">G5/6</div>
+            <div class="gate g5-r">G5/6</div>
             
-            <div class="gate" style="top:25%; left:16%">G4</div> 
+            <div class="gate kl-gate">KL</div>
+            <div class="gate kl-gate-r">KL</div>
 
-            <div class="gate g5-left">G5</div> 
+            <div class="zone z-fire">
+                <div class="z-name">FIRE</div><div class="z-svr">1393, 3253</div>
+            </div>
+            <div class="zone z-earth">
+                <div class="z-name">EARTH</div><div class="z-svr">2877, 2620</div>
+            </div>
+            <div class="zone z-wind">
+                <div class="z-name">WIND</div><div class="z-svr">1486, 1305</div>
+            </div>
 
-            <div class="gate g6-bot-l">G5</div>
-
-            <div class="gate g7-bl">G7</div>
-            <div class="gate" style="top:32%; right:32%">G7</div>
-
-            <div class="arrow arr-ur">↗</div>
-
+            <div class="zone z-day">
+                <div class="z-name">DAYBREAK</div><div class="z-svr" style="color:#000; background:rgba(255,255,255,0.7)">1689, 2334</div>
+            </div>
+            <div class="zone z-green">
+                <div class="z-name">GREENWOOD</div><div class="z-svr">3155, 2238</div>
+            </div>
+            <div class="zone z-water">
+                <div class="z-name">WATER</div><div class="z-svr">1206, 3530</div>
+            </div>
         </div>
 
-        <div class="sec-box" style="padding:15px; margin-bottom:20px;">
-            <span class="card-t" style="color:#ffb74d">📢 Notice</span>
+        <div class="sec-box" style="padding:15px;">
+            <span class="card-t" style="color:#ffb74d; border:none; padding:0; margin-bottom:8px;">📢 Notice (공지)</span>
             <ul style="padding-left:20px; margin:0; font-size:0.9rem; color:#ccc;">
                 <li>⚔️ Goal: 3천만 킬 (30M Kills)</li>
                 <li>🚜 Farming: 자유 (Free)</li>
@@ -210,52 +206,48 @@
             </ul>
         </div>
 
-        <div class="sec-box">
-            <div class="sec-head" style="border-left:4px solid #ef5350" onclick="toggle('s1')">
-                <span>🚩 Milestones (주요일정)</span><span>▼</span>
+        <div class="sec-head" style="border-left:4px solid #ef5350" onclick="toggle('s1')">
+            <span>🚩 Milestones (주요일정)</span><span>▼</span>
+        </div>
+        <div id="s1" class="sec-body open">
+            <div id="t-ms" class="t-box">
+                <span id="tt-ms" style="color:#ffb74d; font-weight:bold">-</span>
+                <span id="td-ms" class="t-num">00:00:00</span>
+                <button class="copy-btn" onclick="copyText('ms')">COPY</button>
             </div>
-            <div id="s1" class="sec-body open">
-                <div id="t-ms" style="text-align:center; padding:10px; background:#121212; border-radius:6px; margin-bottom:5px; border:1px solid #333; display:none">
-                    <span id="tt-ms" style="color:#ffb74d; font-weight:bold">-</span>
-                    <span id="td-ms" class="t-num">00:00:00</span>
-                    <button class="copy-btn" onclick="copyText('ms')">COPY</button>
-                </div>
-                <div id="l-ms"></div>
-            </div>
+            <div id="l-ms"></div>
         </div>
 
-        <div class="sec-box">
-            <div class="sec-head" style="border-left:4px solid #42a5f5" onclick="toggle('s2')">
-                <span>🏛️ Ruins (고대유적)</span><span>▼</span>
+        <div class="sec-head" style="border-left:4px solid #42a5f5; margin-top:10px;" onclick="toggle('s2')">
+            <span>🏛️ Ruins (고대유적)</span><span>▼</span>
+        </div>
+        <div id="s2" class="sec-body">
+            <div id="t-ru" class="t-box">
+                <span id="tt-ru" style="color:#42a5f5; font-weight:bold">-</span>
+                <span id="td-ru" class="t-num">00:00:00</span>
+                <button class="copy-btn" onclick="copyText('ru')">COPY</button>
             </div>
-            <div id="s2" class="sec-body">
-                <div id="t-ru" style="text-align:center; padding:10px; background:#121212; border-radius:6px; margin-bottom:5px; border:1px solid #333; display:none">
-                    <span id="tt-ru" style="color:#42a5f5; font-weight:bold">-</span>
-                    <span id="td-ru" class="t-num">00:00:00</span>
-                    <button class="copy-btn" onclick="copyText('ru')">COPY</button>
-                </div>
-                <div id="l-ru"></div>
-            </div>
+            <div id="l-ru"></div>
         </div>
 
-        <div class="sec-box">
-            <div class="sec-head" style="border-left:4px solid #ab47bc" onclick="toggle('s3')">
-                <span>🔥 Altar (어둠제단)</span><span>▼</span>
+        <div class="sec-head" style="border-left:4px solid #ab47bc; margin-top:10px;" onclick="toggle('s3')">
+            <span>🔥 Altar (어둠제단)</span><span>▼</span>
+        </div>
+        <div id="s3" class="sec-body">
+            <div id="t-al" class="t-box">
+                <span id="tt-al" style="color:#ab47bc; font-weight:bold">-</span>
+                <span id="td-al" class="t-num">00:00:00</span>
+                <button class="copy-btn" onclick="copyText('al')">COPY</button>
             </div>
-            <div id="s3" class="sec-body">
-                <div id="t-al" style="text-align:center; padding:10px; background:#121212; border-radius:6px; margin-bottom:5px; border:1px solid #333; display:none">
-                    <span id="tt-al" style="color:#ab47bc; font-weight:bold">-</span>
-                    <span id="td-al" class="t-num">00:00:00</span>
-                    <button class="copy-btn" onclick="copyText('al')">COPY</button>
-                </div>
-                <div id="l-al"></div>
-            </div>
+            <div id="l-al"></div>
         </div>
 
     </div>
 
     <script>
+    // ===== 안전 모드 (ES5) =====
     try {
+        // KST UTC 변환
         function kst(y,m,d,h,min) {
             return Date.UTC(y, m-1, d, h-9, min, 0);
         }
@@ -272,7 +264,7 @@
             altar: { start: kst(2025,12,22, 0,10), gap: 86, cnt: 10 }
         };
 
-        var NEXT = { ms:null, ru:null, al:null };
+        var TARGETS = { ms:0, ru:0, al:0 };
 
         function pad(n) { return n<10 ? "0"+n : n; }
 
@@ -280,8 +272,8 @@
             if(ts === 0) return "TBA (추후안내)";
             var d = new Date(ts + 9*3600000);
             var u = new Date(ts);
-            var k = d.getUTCFullYear() + "." + pad(d.getUTCMonth()+1) + "." + pad(d.getUTCDate()) + " " + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes());
-            var uk = pad(u.getUTCHours()) + ":" + pad(u.getUTCMinutes());
+            var k = d.getUTCFullYear()+"."+pad(d.getUTCMonth()+1)+"."+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes());
+            var uk = pad(u.getUTCHours())+":"+pad(u.getUTCMinutes());
             return "🇰🇷 " + k + "<br>🌍 UTC " + uk;
         }
 
@@ -299,25 +291,31 @@
 
         function draw(key, arr) {
             var el = document.getElementById("l-"+key);
+            var box = document.getElementById("t-"+key);
+            var tit = document.getElementById("tt-"+key);
+
+            if(arr.length === 0) { el.innerHTML = "<div style='padding:10px; color:#777'>종료됨</div>"; return; }
+
             var next = null;
             for(var i=0; i<arr.length; i++) {
                 if(arr[i].t > 0) { next = arr[i]; break; }
             }
-            NEXT[key] = next;
+            TARGETS[key] = next ? next.t : 0;
 
             if(next) {
-                document.getElementById("t-"+key).style.display = "block";
-                document.getElementById("tt-"+key).innerHTML = next.k;
+                box.style.display = "block";
+                tit.innerHTML = next.k;
+            } else {
+                box.style.display = "none";
             }
 
             var h = "";
             for(var j=0; j<arr.length; j++) {
                 var it = arr[j];
                 var cls = (it === next) ? "row active" : "row";
-                var badge = (it === next) ? "<span class='badge' style='background:#ffb74d;color:#000;padding:1px 4px;font-weight:bold;margin-left:5px;font-size:0.7rem;border-radius:3px;'>NEXT</span>" : "";
-                h += "<div class='"+cls+"'><div><b>"+it.k+"</b>"+badge+"<div style='font-size:0.8rem;color:#888'>"+it.e+"</div></div><div style='text-align:right;font-family:monospace;font-size:0.8rem;color:#aaa'>"+fmt(it.t)+"</div></div>";
+                var badge = (it === next) ? "<span class='badge'>NEXT</span>" : "";
+                h += "<div class='"+cls+"'><div><b>"+it.k+"</b>"+badge+"<div style='font-size:0.8rem;color:#888'>"+it.e+"</div></div><div class='r-right'>"+fmt(it.t)+"</div></div>";
             }
-            if(!arr.length) h="<div style='padding:10px'>종료됨</div>";
             el.innerHTML = h;
         }
 
@@ -343,10 +341,10 @@
         }
 
         function upd(key, now) {
-            var it = NEXT[key];
+            var t = TARGETS[key];
             var el = document.getElementById("td-"+key);
-            if(!it || !it.t) return;
-            var d = it.t - now;
+            if(!t || t===0) return;
+            var d = t - now;
             if(d <= 0) {
                 el.innerHTML = "OPEN NOW!";
                 el.style.color = "#00e676";
@@ -375,7 +373,7 @@
         init();
 
     } catch(e) {
-        document.body.innerHTML += "<div style='color:red;'>Error: "+e.message+"</div>";
+        document.body.innerHTML += "<div style='color:red;'>ERROR: "+e.message+"</div>";
     }
     </script>
 </body>
