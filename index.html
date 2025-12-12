@@ -3,173 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoK KvK 실시간 이벤트 타이머</title>
+    <title>RoK KVK 1689 Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS 스타일 시작 */
+        /* ============================
+           기본 스타일 (안정성 최우선)
+           ============================ */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a2e;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0; padding: 20px;
             text-align: center;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+
+        /* 에러 메시지 박스 */
+        #debug-console {
+            display: none;
+            background: #d32f2f; color: white;
+            padding: 15px; margin-bottom: 20px;
+            border-radius: 8px; text-align: left;
+            font-family: monospace; font-size: 0.9em;
         }
-        h1 {
-            color: #ff5757;
-            margin-bottom: 30px;
+
+        h1 { color: #ffb74d; margin-bottom: 5px; font-size: 1.5rem; letter-spacing: 1px; }
+        .sub-title { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
+
+        /* 시계 */
+        .main-clock {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px; border-radius: 20px;
+            display: inline-block; margin-bottom: 20px;
+            font-family: 'Roboto Mono', monospace;
+            border: 1px solid #333; color: #bbb;
         }
-        .event-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+
+        .container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+
+        /* 대시보드 */
+        .dashboard-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+        .dash-card { flex: 1; min-width: 280px; background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; text-align: left; }
+        .dash-head { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 10px; font-size: 1.1em; }
+        
+        /* 외교 리스트 스타일 */
+        .diplo-group { margin-bottom: 10px; }
+        .diplo-label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.95em; }
+        .diplo-list { font-size: 0.85em; color: #ccc; line-height: 1.4; }
+        .faction-tag { display: inline-block; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; }
+
+        /* 아코디언 */
+        details { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+        details[open] { border-color: #555; }
+        summary {
+            padding: 15px; cursor: pointer; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #252525; list-style: none; user-select: none;
         }
-        .event-card {
-            background-color: #2a2a4a;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '▼'; color: #888; font-size: 0.8em; }
+        details[open] summary::after { transform: rotate(180deg); }
+
+        /* 섹션 컬러 */
+        .sec-milestone summary { border-left: 5px solid #ef5350; }
+        .sec-ruins summary { border-left: 5px solid #42a5f5; }
+        .sec-altar summary { border-left: 5px solid #ab47bc; }
+
+        /* 내부 콘텐츠 */
+        .content-area { padding: 15px; }
+        
+        /* 타이머 박스 */
+        .timer-box { background: #151515; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; text-align: center; }
+        .timer-title { font-weight: bold; color: #fff; font-size: 1.1em; }
+        .timer-digits { font-family: 'Roboto Mono', monospace; font-size: 1.8em; font-weight: bold; margin-top: 5px; color: #fff; }
+        
+        /* 리스트 아이템 */
+        .list-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.03); padding: 10px; margin-bottom: 5px; border-radius: 6px;
         }
-        .event-card:hover {
-            transform: translateY(-5px);
+        .list-item.active { background: rgba(255, 183, 77, 0.15); border: 1px solid #ffb74d; }
+        .list-item.tba { opacity: 0.7; border-left: 3px solid #888; } /* 추후 안내 스타일 */
+
+        .item-left { text-align: left; }
+        .item-right { text-align: right; font-family: 'Roboto Mono', monospace; font-size: 0.8em; color: #aaa; min-width: 120px; }
+        
+        /* 배지 & 버튼 */
+        .badge { font-size: 0.7em; padding: 2px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
+        .bg-gold { background: #ffb74d; color: black; }
+        .btn-copy { background: none; border: 1px solid #666; color: #aaa; font-size: 0.7em; cursor: pointer; border-radius: 4px; margin-left: 10px; }
+
+        @media (max-width: 500px) {
+            .dashboard-grid { flex-direction: column; }
+            .list-item { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .item-right { text-align: left; }
         }
-        .event-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #4CAF50; /* Primary event color */
-            margin-bottom: 10px;
-        }
-        .countdown {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #ffcc00; /* Countdown color */
-            letter-spacing: 2px;
-            margin-top: 10px;
-        }
-        .next-time {
-            font-size: 0.9em;
-            color: #aaa;
-            margin-top: 10px;
-        }
-        .passed {
-            color: #ff5757;
-            font-size: 1.2em;
-        }
-        .recurrence {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 5px;
-        }
-        /* CSS 스타일 끝 */
     </style>
 </head>
 <body>
+
+    <div id="debug-console"></div>
+
+    <h1>KVK 1689 COMMAND CENTER</h1>
+    <div class="sub-title">Storm of Stratagems (계책의 폭풍)</div>
+    <div class="main-clock" id="main-clock">System Loading...</div>
+
     <div class="container">
-        <h1>⚔️ RoK KvK 실시간 이벤트 타이머</h1>
-        <div class="event-grid" id="countdown-grid">
-            </div>
-    </div>
 
-    <script>
-        // JavaScript 코드 시작
-        
-        // --- 1. 이벤트 데이터 설정 ---
-        // [이름, 첫 시작 시각 (YYYY-MM-DD HH:MM), 반복 주기 (시간 단위, 반복 없으면 0)]
-        const events = [
-            // 사용자 지정 일정
-            ["폐허", "2025-12-11 00:10", 40], // 40시간 주기
-            ["제단", "2025-12-22 00:10", 86], // 86시간 주기
-            ["4관문 오픈", "2025-12-14 00:10", 0], // 주기 없음
-            ["5관문 오픈", "2025-12-18 00:10", 0], // 주기 없음
-            ["6관문 오픈", "2025-12-20 00:10", 0]  // 주기 없음
-        ];
-
-        const grid = document.getElementById('countdown-grid');
-        
-        // --- 2. 다음 이벤트 시각 계산 함수 ---
-        function calculateNextEvent(startTimeStr, recurrenceHours) {
-            // 수정된 부분: KST의 공식 UTC 오프셋 (+09:00)을 사용하여 안정적으로 파싱
-            // YYYY-MM-DD HH:MM:00 +09:00 형태로 파싱합니다.
-            let nextTime = new Date(startTimeStr + ":00 +09:00"); 
-            const currentTime = new Date();
-
-            if (recurrenceHours > 0) {
-                const recurrenceMs = recurrenceHours * 60 * 60 * 1000;
+        <div class="dashboard-grid">
+            <div class="dash-card">
+                <div class="dash-head" style="color:#66bb6a">🤝 Diplomacy (외교)</div>
                 
-                // 시작 시각이 현재보다 이전이면, 현재 시각보다 나중일 때까지 주기를 더합니다.
-                while (nextTime.getTime() < currentTime.getTime()) {
-                    nextTime = new Date(nextTime.getTime() + recurrenceMs);
-                }
-            } else {
-                // 반복 없는 단일 이벤트는 시작 시간이 지나면 종료 처리
-                if (nextTime.getTime() < currentTime.getTime()) {
-                    return null; 
-                }
-            }
-            return nextTime;
-        }
-
-        // --- 3. 실시간 카운트다운 업데이트 함수 ---
-        function updateCountdown() {
-            const currentTime = new Date();
-            let htmlContent = '';
-
-            events.forEach(([title, startTimeStr, recurrenceHours], index) => {
-                const nextTime = calculateNextEvent(startTimeStr, recurrenceHours);
-                let countdownHTML = '';
-                let nextTimeStr = '';
-                let recurrenceStr = recurrenceHours > 0 ? `${recurrenceHours}시간 주기` : '단일 이벤트';
-                
-                if (nextTime === null) {
-                    // 단일 이벤트가 이미 지난 경우
-                    countdownHTML = `<div class="countdown passed">완료</div>`;
-                    nextTimeStr = '';
-                    recurrenceStr = '이벤트 종료';
-                } else {
-                    const timeDifference = nextTime.getTime() - currentTime.getTime();
-                    
-                    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-                    // 포맷팅 (05, 09 처럼 두 자리로 맞춤)
-                    const format = (n) => String(n).padStart(2, '0');
-
-                    if (days > 0) {
-                        countdownHTML = `<div class="countdown">${days}일 ${format(hours)}:${format(minutes)}:${format(seconds)}</div>`;
-                    } else {
-                        countdownHTML = `<div class="countdown">${format(hours)}:${format(minutes)}:${format(seconds)}</div>`;
-                    }
-                    
-                    // 다음 오픈 시각을 깔끔하게 한국어로 표시
-                    nextTimeStr = `다음 오픈: ${nextTime.toLocaleString('ko-KR', { 
-                        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false 
-                    })}`;
-                }
-
-                // HTML 카드 생성 및 추가
-                htmlContent += `
-                    <div class="event-card" id="event-${index}">
-                        <div class="event-title">${title}</div>
-                        ${countdownHTML}
-                        <div class="next-time">${nextTimeStr}</div>
-                        <div class="recurrence">${recurrenceStr}</div>
+                <div class="diplo-group">
+                    <span class="diplo-label" style="color:#66bb6a">🔵 Allies (아군)</span>
+                    <div class="diplo-list">
+                        <span class="faction-tag">Daybreak (1689, 2334)</span>
+                        <span class="faction-tag">Greenwood (3155, 2238)</span>
+                        <span class="faction-tag">Water (1206, 3530)</span>
                     </div>
-                `;
-            });
+                </div>
 
-            grid.innerHTML = htmlContent;
-        }
+                <div class="diplo-group">
+                    <span class="diplo-label" style="color:#ef5350">🔴 Enemies (적군)</span>
+                    <div class="diplo-list">
+                        <span class="faction-tag">Fire (1393, 3253)</span>
+                        <span class="faction-tag">Earth (2877, 2620)</span>
+                        <span class="faction-tag">Wind (1486, 1305)</span>
+                    </div>
+                </div>
+            </div>
 
-        // 1초마다 카운트다운을 업데이트
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-        // JavaScript 코드 끝
-    </script>
-</body>
-</html>
+            <div class="dash-card">
+                <div class="dash-head" style="color:#ffb74d">📢 Notice (공지)</div>
+                <ul style="padding-left:20px; margin:0; font-size:0.9em; color:#ccc; line-height:1.6">
+                    <li>⚔️ <strong>Goal:</strong> 3천만 킬 (30M Kills)</li>
+                    <li>🚜 <strong>Farming:
