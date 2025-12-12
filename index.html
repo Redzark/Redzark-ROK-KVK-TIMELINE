@@ -5,97 +5,156 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RoK KVK 1689 CENTER</title>
 <style>
-    /* 기본 설정 */
+    /* === 기본 스타일 === */
     body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
     h1 { color: #ffb74d; font-size: 1.4rem; margin: 5px 0; }
     .sub { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
     
     /* 시계 */
-    #clock-box { background: #1e1e1e; border: 1px solid #333; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 20px; font-family: monospace; line-height: 1.4; color: #fff; }
+    #clock-box { background: #1e1e1e; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; display: inline-block; margin-bottom: 20px; font-family: monospace; line-height: 1.4; color: #ccc; font-size: 0.85rem; }
 
-    /* 컨테이너 */
-    .wrap { max-width: 600px; margin: 0 auto; text-align: left; }
+    .wrap { max-width: 720px; margin: 0 auto; text-align: left; }
     
-    /* 카드 */
-    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-    .card-t { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 10px; display: block; font-size: 1.1rem; }
+    /* === 상단 레이아웃 (외교 + 맵) === */
+    .top-section { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
     
-    /* 🎨 [진영별 색상 디자인] */
-    .faction-box { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-    .tag { display: inline-block; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    /* 1. 왼쪽: 외교 리스트 */
+    .left-panel { flex: 1; min-width: 200px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: center; }
     
-    /* 아군 색상 */
-    .bg-day { background: linear-gradient(135deg, #fbc02d, #f57f17); color: #000; text-shadow: none; } /* Daybreak (노랑) */
-    .bg-green { background: linear-gradient(135deg, #43a047, #2e7d32); } /* Greenwood (초록) */
-    .bg-water { background: linear-gradient(135deg, #1e88e5, #1565c0); } /* Water (파랑) */
+    /* 2. 오른쪽: 전술 맵 */
+    .right-panel { flex: 2; min-width: 300px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; position: relative; height: 250px; overflow: hidden; box-shadow: inset 0 0 20px #000; }
     
-    /* 적군 색상 */
-    .bg-fire { background: linear-gradient(135deg, #e53935, #c62828); } /* Fire (빨강) */
-    .bg-earth { background: linear-gradient(135deg, #795548, #4e342e); } /* Earth (갈색) */
-    .bg-wind { background: linear-gradient(135deg, #00897b, #00695c); } /* Wind (청록) */
+    /* 맵 배경 패턴 (격자) */
+    .map-grid {
+        width: 100%; height: 100%;
+        background-image: 
+            linear-gradient(#222 1px, transparent 1px),
+            linear-gradient(90deg, #222 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.5;
+    }
+    
+    /* 킹스랜드 (중앙) */
+    .kingsland {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 60px; height: 60px; border: 2px dashed #555; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem; color: #555; font-weight: bold; text-align: center;
+        background: rgba(0,0,0,0.3); z-index: 1;
+    }
 
-    /* 섹션 제목 색상 */
-    .c-safe { color: #66bb6a; } 
-    .c-danger { color: #ef5350; } 
-    .c-notice { color: #ffb74d; }
+    /* 맵 핀 (Camp Pins) */
+    .pin {
+        position: absolute; padding: 4px 8px; border-radius: 4px; 
+        font-size: 0.7rem; color: white; text-align: center; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 2;
+        min-width: 70px;
+    }
+    .pin b { display: block; font-size: 0.8rem; margin-bottom: 2px; }
+    .pin span { font-size: 0.65rem; opacity: 0.9; display: block; }
 
-    /* 아코디언 */
+    /* 아군 핀 스타일 */
+    .pin-ally { border: 1px solid #66bb6a; background: rgba(20, 50, 20, 0.85); }
+    .pin-ally b { color: #66bb6a; }
+    
+    /* 적군 핀 스타일 */
+    .pin-enemy { border: 1px solid #ef5350; background: rgba(50, 20, 20, 0.85); }
+    .pin-enemy b { color: #ef5350; }
+
+    /* 핀 위치 (시계 방향 배치) */
+    .p-top { top: 10px; left: 50%; transform: translateX(-50%); } /* Fire */
+    .p-tr  { top: 20%; right: 10px; } /* Greenwood */
+    .p-br  { bottom: 20%; right: 10px; } /* Wind */
+    .p-bot { bottom: 10px; left: 50%; transform: translateX(-50%); } /* Water */
+    .p-bl  { bottom: 20%; left: 10px; } /* Earth */
+    .p-tl  { top: 20%; left: 10px; } /* Daybreak */
+
+    /* === 공통 UI 요소 === */
+    .card-t { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 8px; display: block; font-size: 1rem; }
+    .c-green { color: #66bb6a; } .c-red { color: #ef5350; } .c-gold { color: #ffb74d; } 
+    .tag { display: inline-block; background: #333; padding: 2px 5px; border-radius: 3px; font-size: 0.75rem; margin: 2px 0; color: #ccc; width: 100%; box-sizing: border-box;}
+
+    /* 아코디언 & 리스트 */
     .sec { border: 1px solid #333; border-radius: 8px; background: #1e1e1e; margin-bottom: 10px; overflow: hidden; }
-    .sec-head { padding: 12px; background: #252525; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; user-select: none; }
+    .sec-head { padding: 12px; background: #252525; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
     .sec-body { display: none; padding: 10px; border-top: 1px solid #333; }
     .sec-body.open { display: block; }
 
-    /* 타이머 */
     .t-box { background: #121212; border: 1px solid #333; padding: 10px; text-align: center; border-radius: 6px; margin-bottom: 10px; }
     .t-big { font-size: 1.4rem; font-weight: bold; font-family: monospace; color: #fff; display: block; margin-top: 5px; }
     
-    /* 리스트 */
     .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; }
     .row:last-child { border-bottom: none; }
     .row.active { background: rgba(255, 183, 77, 0.1); }
     .r-right { text-align: right; font-family: monospace; color: #888; font-size: 0.8rem; }
     
     .badge { background: #ffb74d; color: #000; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px; font-weight: bold; }
-    
-    #log { margin-top: 50px; color: #555; font-size: 0.7rem; text-align: left; white-space: pre-wrap; display: none; }
+
+    @media (max-width: 600px) {
+        .top-section { flex-direction: column; }
+        .right-panel { height: 300px; } /* 모바일에서 맵 더 크게 */
+    }
 </style>
 </head>
 <body>
 
     <h1>KVK 1689 CENTER</h1>
     <div class="sub">Storm of Stratagems (계책의 폭풍)</div>
-    
-    <div id="clock-box">System Loading...</div>
+    <div id="clock-box">Loading...</div>
 
     <div class="wrap">
         
-        <div class="card">
-            <span class="card-t c-safe">🤝 Diplomacy (외교)</span>
+        <div class="top-section">
             
-            <div style="margin-bottom: 15px;">
-                <div style="font-size:0.9rem; margin-bottom:5px; color:#aaa;">🔵 Allies (우리팀)</div>
-                <div class="faction-box">
-                    <span class="tag bg-day">☀️ Daybreak (1689, 2334)</span>
-                    <span class="tag bg-green">🌲 Greenwood (3155, 2238)</span>
-                    <span class="tag bg-water">💧 Water (1206, 3530)</span>
+            <div class="left-panel">
+                <span class="card-t c-green">🤝 Diplomacy</span>
+                
+                <div style="margin-bottom:10px">
+                    <span style="color:#66bb6a; font-weight:bold; font-size:0.9rem;">🔵 Allies (아군)</span>
+                    <span class="tag">☀️ Daybreak (1689)</span>
+                    <span class="tag">🌲 Greenwood (3155)</span>
+                    <span class="tag">💧 Water (1206)</span>
+                </div>
+                
+                <div>
+                    <span style="color:#ef5350; font-weight:bold; font-size:0.9rem;">🔴 Enemies (적군)</span>
+                    <span class="tag">🔥 Fire (1393)</span>
+                    <span class="tag">⛰️ Earth (2877)</span>
+                    <span class="tag">🍃 Wind (1486)</span>
                 </div>
             </div>
 
-            <div>
-                <div style="font-size:0.9rem; margin-bottom:5px; color:#aaa;">🔴 Enemies (적군)</div>
-                <div class="faction-box">
-                    <span class="tag bg-fire">🔥 Fire (1393, 3253)</span>
-                    <span class="tag bg-earth">⛰️ Earth (2877, 2620)</span>
-                    <span class="tag bg-wind">🍃 Wind (1486, 1305)</span>
+            <div class="right-panel">
+                <div class="map-grid"></div>
+                <div class="kingsland">KING'S<br>LAND</div>
+
+                <div class="pin pin-ally p-tl">
+                    <b>Daybreak</b><span>1689, 2334</span>
+                </div>
+                <div class="pin pin-ally p-tr">
+                    <b>Greenwood</b><span>3155, 2238</span>
+                </div>
+                <div class="pin pin-ally p-bot">
+                    <b>Water</b><span>1206, 3530</span>
+                </div>
+
+                <div class="pin pin-enemy p-top">
+                    <b>Fire</b><span>1393, 3253</span>
+                </div>
+                <div class="pin pin-enemy p-bl">
+                    <b>Earth</b><span>2877, 2620</span>
+                </div>
+                <div class="pin pin-enemy p-br">
+                    <b>Wind</b><span>1486, 1305</span>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <span class="card-t c-notice">📢 Notice (공지)</span>
-            <ul style="padding-left:20px; margin:0; font-size:0.9rem; color:#ccc; line-height: 1.6;">
+        <div class="sec" style="padding:12px">
+            <span class="card-t c-gold">📢 Notice (공지)</span>
+            <ul style="padding-left:20px; margin:0; font-size:0.9rem; color:#ccc;">
                 <li>⚔️ Goal: 3천만 킬 (30M Kills)</li>
-                <li>🚜 Farming: 자유 (Free / No Tile Hits)</li>
+                <li>🚜 Farming: 자유 (Free)</li>
                 <li>⛔ City Hit: 금지 (No Zeroing)</li>
             </ul>
         </div>
@@ -142,145 +201,127 @@
     </div>
 
     <script>
-    // ===== 안전장치 =====
-    function debug(msg) { /* console.log(msg); */ }
-
-    try {
-        // 날짜 생성 (KST 기준, 정수 입력)
-        // Date.UTC(년, 월-1, 일, 시-9, 분)
-        function getKSTTime(y, m, d, h, min) {
-            return Date.UTC(y, m-1, d, h-9, min, 0);
-        }
-
-        // ===== 데이터 설정 =====
-        var DATA = {
-            ms: [
-                { k:"4관문 오픈", e:"Gate 4", t: getKSTTime(2025,12,14, 0,10) },
-                { k:"5관문 오픈", e:"Gate 5", t: getKSTTime(2025,12,18, 0,10) },
-                { k:"6관문 오픈", e:"Gate 6", t: getKSTTime(2025,12,20, 0,10) },
-                { k:"킹스랜드", e:"Kingsland", t: 0 },
-                { k:"KVK 종료", e:"End", t: 0 }
-            ],
-            ruins: { start: getKSTTime(2025,12,11, 0,10), gap: 40, cnt: 28 },
-            altar: { start: getKSTTime(2025,12,22, 0,10), gap: 86, cnt: 10 }
-        };
-
-        var TARGETS = { ms:0, ru:0, al:0 };
-
-        // ===== 유틸 함수 =====
-        function pad(n) { return n<10 ? "0"+n : n; }
-
-        function fmtTime(ts) {
-            if(ts === 0) return "<span style='color:#777'>TBA (추후안내)</span>";
-            var d = new Date(ts + (9*3600000));
-            var u = new Date(ts);
-            var kst = d.getUTCFullYear() + "." + pad(d.getUTCMonth()+1) + "." + pad(d.getUTCDate()) + " " + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes());
-            var utc = pad(u.getUTCHours()) + ":" + pad(u.getUTCMinutes());
-            return "🇰🇷 " + kst + "<br>🌍 UTC " + utc;
-        }
-
-        function makeList(cfg, nk, ne) {
-            var arr = [];
-            var now = new Date().getTime();
-            var st = cfg.start;
-            for(var i=0; i<cfg.cnt; i++) {
-                var t = st + (i * cfg.gap * 3600000);
-                if(t > now - 7200000) {
-                    arr.push({ k: nk + " ("+(i+1)+")", e: ne + " #"+(i+1), t: t });
-                }
-            }
-            return arr;
-        }
-
-        function draw(key, list) {
-            var el = document.getElementById("lst-" + key);
-            var box = document.getElementById("tb-" + key);
-            var tit = document.getElementById("tt-" + key);
-
-            if(list.length === 0) {
-                el.innerHTML = "<div style='padding:10px; color:#666;'>종료됨</div>";
-                return;
-            }
-
-            var next = null;
-            for(var i=0; i<list.length; i++) {
-                if(list[i].t > 0) { next = list[i]; break; }
-            }
-
-            if(next) {
-                TARGETS[key] = next.t;
-                box.style.display = "block";
-                tit.innerHTML = next.k + " / " + next.e;
-            }
-
-            var h = "";
-            for(var j=0; j<list.length; j++) {
-                var item = list[j];
-                var isNext = (item === next);
-                var cls = isNext ? "row active" : "row";
-                var badge = isNext ? "<span class='badge'>NEXT</span>" : "";
-                
-                h += "<div class='"+cls+"'>" +
-                     "<div><b>"+item.k+"</b>"+badge+"<div style='font-size:0.8rem;color:#888'>"+item.e+"</div></div>" +
-                     "<div class='r-right'>"+fmtTime(item.t)+"</div>" +
-                     "</div>";
-            }
-            el.innerHTML = h;
-        }
-
-        // ===== 실행 =====
-        function init() {
-            draw("ms", DATA.ms);
-            draw("ru", makeList(DATA.ruins, "고대유적", "Ruins"));
-            draw("al", makeList(DATA.altar, "어둠제단", "Altar"));
-            setInterval(tick, 1000);
-            tick();
-        }
-
-        function tick() {
-            var now = new Date();
-            var nowTs = now.getTime();
-            var kstD = new Date(nowTs + (9*3600000));
-            var ks = kstD.getUTCFullYear()+"-"+pad(kstD.getUTCMonth()+1)+"-"+pad(kstD.getUTCDate())+" "+pad(kstD.getUTCHours())+":"+pad(kstD.getUTCMinutes())+":"+pad(kstD.getUTCSeconds());
-            var us = pad(now.getUTCHours())+":"+pad(now.getUTCMinutes())+":"+pad(now.getUTCSeconds());
-            
-            document.getElementById("clock-box").innerHTML = "🇰🇷 " + ks + " (KST)<br>🌍 " + us + " (UTC)";
-
-            updTimer("ms", nowTs);
-            updTimer("ru", nowTs);
-            updTimer("al", nowTs);
-        }
-
-        function updTimer(key, nowTs) {
-            var t = TARGETS[key];
-            var el = document.getElementById("td-" + key);
-            if(!t || t===0) return;
-
-            var diff = t - nowTs;
-            if(diff <= 0) {
-                el.innerHTML = "OPEN NOW!";
-                el.style.color = "#00e676";
-            } else {
-                var s = Math.floor((diff/1000)%60);
-                var m = Math.floor((diff/60000)%60);
-                var h = Math.floor((diff/3600000)%24);
-                var d = Math.floor(diff/86400000);
-                el.innerHTML = d + "d " + pad(h) + ":" + pad(m) + ":" + pad(s);
-                el.style.color = "#fff";
-            }
-        }
-
-        window.toggle = function(id) {
-            var el = document.getElementById(id);
-            if(el.style.display === "block") el.style.display = "none";
-            else el.style.display = "block";
-        };
-
-        init();
-
-    } catch(e) {
-        document.body.innerHTML += "<div style='color:red; margin-top:20px;'>Error: "+e.message+"</div>";
+    // ===== 1. 날짜 생성 함수 (안정성 Ver) =====
+    function getKSTTime(y, m, d, h, min) {
+        // Date.UTC(년, 월-1, 일, 시-9, 분) -> KST 시간을 UTC 숫자로 변환
+        return Date.UTC(y, m-1, d, h-9, min, 0);
     }
+
+    // ===== 2. 데이터 설정 =====
+    var DATA = {
+        ms: [
+            { k:"4관문 오픈", e:"Gate 4", t: getKSTTime(2025,12,14, 0,10) },
+            { k:"5관문 오픈", e:"Gate 5", t: getKSTTime(2025,12,18, 0,10) },
+            { k:"6관문 오픈", e:"Gate 6", t: getKSTTime(2025,12,20, 0,10) },
+            { k:"킹스랜드", e:"Kingsland", t: 0 },
+            { k:"KVK 종료", e:"End", t: 0 }
+        ],
+        ruins: { start: getKSTTime(2025,12,11, 0,10), gap: 40, cnt: 28 },
+        altar: { start: getKSTTime(2025,12,22, 0,10), gap: 86, cnt: 10 }
+    };
+
+    var TARGETS = { ms:0, ru:0, al:0 };
+
+    // ===== 3. 유틸 함수 =====
+    function pad(n) { return n<10 ? "0"+n : n; }
+
+    function fmtTime(ts) {
+        if(ts === 0) return "TBA (추후안내)";
+        var d = new Date(ts + (9*3600000));
+        var u = new Date(ts);
+        var kst = d.getUTCFullYear() + "." + pad(d.getUTCMonth()+1) + "." + pad(d.getUTCDate()) + " " + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes());
+        var utc = pad(u.getUTCHours()) + ":" + pad(u.getUTCMinutes());
+        return "🇰🇷 " + kst + "<br>🌍 UTC " + utc;
+    }
+
+    function makeList(cfg, nk, ne) {
+        var arr = [];
+        var now = new Date().getTime();
+        var st = cfg.start;
+        for(var i=0; i<cfg.cnt; i++) {
+            var t = st + (i * cfg.gap * 3600000);
+            if(t > now - 7200000) {
+                arr.push({ k: nk + " ("+(i+1)+")", e: ne + " #"+(i+1), t: t });
+            }
+        }
+        return arr;
+    }
+
+    function draw(key, list) {
+        var el = document.getElementById("lst-" + key);
+        var box = document.getElementById("tb-" + key);
+        var tit = document.getElementById("tt-" + key);
+
+        if(list.length === 0) { el.innerHTML = "End."; return; }
+
+        var next = null;
+        for(var i=0; i<list.length; i++) {
+            if(list[i].t > 0) { next = list[i]; break; }
+        }
+
+        if(next) {
+            TARGETS[key] = next.t;
+            box.style.display = "block";
+            tit.innerHTML = next.k;
+        }
+
+        var h = "";
+        for(var j=0; j<list.length; j++) {
+            var item = list[j];
+            var isNext = (item === next);
+            var cls = isNext ? "row active" : "row";
+            var badge = isNext ? "<span class='badge'>NEXT</span>" : "";
+            h += "<div class='"+cls+"'><div><b>"+item.k+"</b>"+badge+"<div style='font-size:0.8rem;color:#888'>"+item.e+"</div></div><div class='r-right'>"+fmtTime(item.t)+"</div></div>";
+        }
+        el.innerHTML = h;
+    }
+
+    function init() {
+        draw("ms", DATA.ms);
+        draw("ru", makeList(DATA.ruins, "고대유적", "Ruins"));
+        draw("al", makeList(DATA.altar, "어둠제단", "Altar"));
+        setInterval(tick, 1000);
+        tick();
+    }
+
+    function tick() {
+        var now = new Date();
+        var nowTs = now.getTime();
+        var kstD = new Date(nowTs + (9*3600000));
+        var ks = kstD.getUTCFullYear()+"-"+pad(kstD.getUTCMonth()+1)+"-"+pad(kstD.getUTCDate())+" "+pad(kstD.getUTCHours())+":"+pad(kstD.getUTCMinutes())+":"+pad(kstD.getUTCSeconds());
+        var us = pad(now.getUTCHours())+":"+pad(now.getUTCMinutes())+":"+pad(now.getUTCSeconds());
+        document.getElementById("clock-box").innerHTML = "🇰🇷 " + ks + " (KST) | 🌍 " + us + " (UTC)";
+
+        updTimer("ms", nowTs);
+        updTimer("ru", nowTs);
+        updTimer("al", nowTs);
+    }
+
+    function updTimer(key, nowTs) {
+        var t = TARGETS[key];
+        var el = document.getElementById("td-" + key);
+        if(!t || t===0) return;
+        var diff = t - nowTs;
+        if(diff <= 0) {
+            el.innerHTML = "OPEN NOW!";
+            el.style.color = "#00e676";
+        } else {
+            var s = Math.floor((diff/1000)%60);
+            var m = Math.floor((diff/60000)%60);
+            var h = Math.floor((diff/3600000)%24);
+            var d = Math.floor(diff/86400000);
+            el.innerHTML = d + "d " + pad(h) + ":" + pad(m) + ":" + pad(s);
+            el.style.color = "#fff";
+        }
+    }
+
+    window.toggle = function(id) {
+        var el = document.getElementById(id);
+        if(el.style.display === "block") el.style.display = "none";
+        else el.style.display = "block";
+    };
+
+    init();
     </script>
 </body>
 </html>
