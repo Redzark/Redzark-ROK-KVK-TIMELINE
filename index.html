@@ -35,80 +35,79 @@
     .bg-earth { background: #5d4037; }
     .bg-wind { background: #4527a0; }
 
-    /* === 2. 전술 지도 (레이어 구조 구현) === */
+    /* === 2. 리얼 맵 (이미지 배경) === */
     .map-container {
-        position: relative; width: 100%; height: 360px; /* 맵 높이 */
-        background: #111; border: 2px solid #444; border-radius: 12px;
-        margin-bottom: 20px; overflow: hidden; box-shadow: inset 0 0 50px #000;
+        position: relative; 
+        width: 100%; 
+        /* 👇 이미지 비율에 맞춰 높이 조절 (16:9 비율 예시) */
+        aspect-ratio: 16 / 9;
+        background-color: #111; /* 이미지가 없을 때 검은색 */
+        
+        /* 👇 [중요] 여기에 실제 맵 이미지를 넣으세요! */
+        background-image: url('kvk_map.png'); 
+        
+        background-size: cover; /* 이미지를 꽉 차게 */
+        background-position: center;
+        border: 2px solid #444; border-radius: 12px;
+        margin-bottom: 20px; overflow: hidden; 
+        box-shadow: 0 0 20px #000;
     }
 
-    /* 맵 배경 그리드 */
-    .map-grid {
-        position: absolute; width: 100%; height: 100%; opacity: 0.2;
-        background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px);
-        background-size: 20px 20px;
-    }
-
-    /* [구역 박스] */
-    .zone {
-        position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border-radius: 6px; text-align: center; color: #fff; font-weight: bold;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; border: 1px solid rgba(255,255,255,0.3);
-    }
-    .z-name { font-size: 0.85rem; text-shadow: 1px 1px 2px #000; }
-    .z-svr { font-size: 0.65rem; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 3px; margin-top: 2px; }
-
-    /* 1. 스타팅 존 (4존) - 외곽 */
-    /* 적군 */
-    .z-fire { top: 10px; left: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #b71c1c, #880e4f); border-color: #ef5350; }
-    .z-earth { top: 10px; left: 50%; transform: translateX(-50%); width: 30%; height: 25%; background: linear-gradient(135deg, #4e342e, #3e2723); border-color: #8d6e63; }
-    .z-wind { top: 10px; right: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #311b92, #1a237e); border-color: #7e57c2; }
-    
-    /* 아군 */
-    .z-day { bottom: 10px; left: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #f57f17, #ef6c00); border-color: #ffca28; color: white; }
-    .z-green { bottom: 10px; left: 50%; transform: translateX(-50%); width: 30%; height: 25%; background: linear-gradient(135deg, #1b5e20, #0d3b10); border-color: #66bb6a; }
-    .z-water { bottom: 10px; right: 10px; width: 30%; height: 25%; background: linear-gradient(135deg, #01579b, #003c6c); border-color: #42a5f5; }
-
-    /* 2. 중간 존 (5/6존) - 연결 부위 */
-    .mid-zone-bg {
-        position: absolute; top: 28%; left: 5%; right: 5%; bottom: 28%;
-        border: 2px dashed #444; border-radius: 20px;
-        background: rgba(255,255,255,0.02); pointer-events: none; z-index: 1;
-    }
-
-    /* 3. 킹스랜드 (7존 내부) - 정중앙 */
-    .kingsland {
+    /* 이미지가 없을 때 안내 문구 */
+    .map-placeholder-text {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 25%; height: 25%; background: rgba(239, 83, 80, 0.15);
-        border: 2px solid #ef5350; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        color: #ffb74d; font-weight: bold; font-size: 0.9rem;
-        box-shadow: 0 0 30px rgba(239, 83, 80, 0.3); z-index: 3;
+        color: #555; font-size: 0.8rem; text-align: center; pointer-events: none;
     }
 
-    /* 4. 관문 (Gate) - 경로 시각화 */
-    .gate {
-        position: absolute; background: #000; color: #fff; border: 1px solid #aaa;
-        font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; z-index: 5; font-weight: bold;
+    /* 핀 (Pin) 공통 스타일 */
+    .pin {
+        position: absolute; transform: translate(-50%, -50%);
+        display: flex; flex-direction: column; align-items: center;
+        z-index: 10; cursor: default;
     }
+    .pin-label {
+        background: rgba(0, 0, 0, 0.8); border: 1px solid #aaa;
+        color: #fff; padding: 4px 8px; border-radius: 6px;
+        text-align: center; backdrop-filter: blur(2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    }
+    .p-name { font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 2px; }
+    .p-svr { font-size: 0.7rem; color: #ccc; font-family: monospace; display: block; }
     
-    /* G4 (4존 -> 5존) */
-    .g4-l { top: 26%; left: 20%; }
-    .g4-c { top: 26%; left: 50%; transform: translateX(-50%); }
-    .g4-r { top: 26%; right: 20%; }
-    .g4-lb { bottom: 26%; left: 20%; }
-    .g4-cb { bottom: 26%; left: 50%; transform: translateX(-50%); }
-    .g4-rb { bottom: 26%; right: 20%; }
+    /* 핀 꼭지점 (아래 화살표) */
+    .pin::after {
+        content: ''; width: 0; height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid rgba(0,0,0,0.8);
+        margin-top: -1px;
+    }
 
-    /* G5/G6 (중간 -> 내부) */
-    .g5-l { top: 40%; left: 30%; }
-    .g5-r { top: 40%; right: 30%; }
-    .g5-lb { bottom: 40%; left: 30%; }
-    .g5-rb { bottom: 40%; right: 30%; }
+    /* 아군 핀 스타일 */
+    .ally .pin-label { border-color: #66bb6a; box-shadow: 0 0 10px rgba(102, 187, 106, 0.4); }
+    .ally .p-name { color: #66bb6a; }
 
-    /* KL 입구 (7존 -> KL) */
-    .kl-gate { top: 50%; left: 35%; transform: translate(-50%, -50%); background: #d32f2f; border-color: #ff5252; }
-    .kl-gate-r { top: 50%; right: 35%; transform: translate(50%, -50%); background: #d32f2f; border-color: #ff5252; }
+    /* 적군 핀 스타일 */
+    .enemy .pin-label { border-color: #ef5350; box-shadow: 0 0 10px rgba(239, 83, 80, 0.4); }
+    .enemy .p-name { color: #ef5350; }
+
+    /* === 핀 좌표 (스크린샷 기준 정밀 배치) === */
+    /* 위쪽 (적군) */
+    .pos-fire { top: 20%; left: 20%; }
+    .pos-earth { top: 15%; left: 50%; }
+    .pos-wind { top: 20%; left: 80%; }
+
+    /* 아래쪽 (아군) */
+    .pos-day { bottom: 20%; left: 20%; }
+    .pos-green { bottom: 15%; left: 50%; }
+    .pos-water { bottom: 20%; left: 80%; }
+
+    /* 중앙 (킹스랜드) */
+    .kingsland-label {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        color: rgba(255, 255, 255, 0.5); font-weight: bold; font-size: 1rem;
+        letter-spacing: 2px; text-shadow: 0 2px 4px #000; pointer-events: none;
+    }
 
     /* === 공지 & 리스트 === */
     .sec-box { border: 1px solid #333; border-radius: 8px; background: #1e2328; margin-bottom: 10px; overflow: hidden; }
@@ -159,41 +158,48 @@
         </div>
 
         <div class="map-container">
-            <div class="map-grid"></div>
-            <div class="mid-zone-bg"></div> <div class="kingsland">KING'S<br>LAND</div>
-
-            <div class="gate g4-l">G4</div>
-            <div class="gate g4-c">G4</div>
-            <div class="gate g4-r">G4</div>
-            
-            <div class="gate g4-lb">G4</div>
-            <div class="gate g4-cb">G4</div>
-            <div class="gate g4-rb">G4</div>
-
-            <div class="gate g5-l">G5/6</div>
-            <div class="gate g5-r">G5/6</div>
-            
-            <div class="gate kl-gate">KL</div>
-            <div class="gate kl-gate-r">KL</div>
-
-            <div class="zone z-fire">
-                <div class="z-name">FIRE</div><div class="z-svr">1393, 3253</div>
-            </div>
-            <div class="zone z-earth">
-                <div class="z-name">EARTH</div><div class="z-svr">2877, 2620</div>
-            </div>
-            <div class="zone z-wind">
-                <div class="z-name">WIND</div><div class="z-svr">1486, 1305</div>
+            <div class="map-placeholder-text">
+                'kvk_map.png' 이미지를<br>같은 폴더에 넣어주세요.
             </div>
 
-            <div class="zone z-day">
-                <div class="z-name">DAYBREAK</div><div class="z-svr" style="color:#000; background:rgba(255,255,255,0.7)">1689, 2334</div>
+            <div class="kingsland-label">KING'S LAND</div>
+
+            <div class="pin enemy pos-fire">
+                <div class="pin-label">
+                    <span class="p-name">🔥 FIRE</span>
+                    <span class="p-svr">1393, 3253</span>
+                </div>
             </div>
-            <div class="zone z-green">
-                <div class="z-name">GREENWOOD</div><div class="z-svr">3155, 2238</div>
+            <div class="pin enemy pos-earth">
+                <div class="pin-label">
+                    <span class="p-name">⛰️ EARTH</span>
+                    <span class="p-svr">2877, 2620</span>
+                </div>
             </div>
-            <div class="zone z-water">
-                <div class="z-name">WATER</div><div class="z-svr">1206, 3530</div>
+            <div class="pin enemy pos-wind">
+                <div class="pin-label">
+                    <span class="p-name">🍃 WIND</span>
+                    <span class="p-svr">1486, 1305</span>
+                </div>
+            </div>
+
+            <div class="pin ally pos-day">
+                <div class="pin-label">
+                    <span class="p-name">☀️ DAYBREAK</span>
+                    <span class="p-svr">1689, 2334</span>
+                </div>
+            </div>
+            <div class="pin ally pos-green">
+                <div class="pin-label">
+                    <span class="p-name">🌲 GREENWOOD</span>
+                    <span class="p-svr">3155, 2238</span>
+                </div>
+            </div>
+            <div class="pin ally pos-water">
+                <div class="pin-label">
+                    <span class="p-name">💧 WATER</span>
+                    <span class="p-svr">1206, 3530</span>
+                </div>
             </div>
         </div>
 
@@ -223,158 +229,4 @@
         </div>
         <div id="s2" class="sec-body">
             <div id="t-ru" class="t-box">
-                <span id="tt-ru" style="color:#42a5f5; font-weight:bold">-</span>
-                <span id="td-ru" class="t-num">00:00:00</span>
-                <button class="copy-btn" onclick="copyText('ru')">COPY</button>
-            </div>
-            <div id="l-ru"></div>
-        </div>
-
-        <div class="sec-head" style="border-left:4px solid #ab47bc; margin-top:10px;" onclick="toggle('s3')">
-            <span>🔥 Altar (어둠제단)</span><span>▼</span>
-        </div>
-        <div id="s3" class="sec-body">
-            <div id="t-al" class="t-box">
-                <span id="tt-al" style="color:#ab47bc; font-weight:bold">-</span>
-                <span id="td-al" class="t-num">00:00:00</span>
-                <button class="copy-btn" onclick="copyText('al')">COPY</button>
-            </div>
-            <div id="l-al"></div>
-        </div>
-
-    </div>
-
-    <script>
-    // ===== 안전 모드 (ES5) =====
-    try {
-        // KST UTC 변환
-        function kst(y,m,d,h,min) {
-            return Date.UTC(y, m-1, d, h-9, min, 0);
-        }
-
-        var DATA = {
-            ms: [
-                { k:"4관문 오픈", e:"Gate 4", t: kst(2025,12,14, 0,10) },
-                { k:"5관문 오픈", e:"Gate 5", t: kst(2025,12,18, 0,10) },
-                { k:"6관문 오픈", e:"Gate 6", t: kst(2025,12,20, 0,10) },
-                { k:"킹스랜드", e:"Kingsland", t: 0 },
-                { k:"KVK 종료", e:"End", t: 0 }
-            ],
-            ruins: { start: kst(2025,12,11, 0,10), gap: 40, cnt: 28 },
-            altar: { start: kst(2025,12,22, 0,10), gap: 86, cnt: 10 }
-        };
-
-        var TARGETS = { ms:0, ru:0, al:0 };
-
-        function pad(n) { return n<10 ? "0"+n : n; }
-
-        function fmt(ts) {
-            if(ts === 0) return "TBA (추후안내)";
-            var d = new Date(ts + 9*3600000);
-            var u = new Date(ts);
-            var k = d.getUTCFullYear()+"."+pad(d.getUTCMonth()+1)+"."+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes());
-            var uk = pad(u.getUTCHours())+":"+pad(u.getUTCMinutes());
-            return "🇰🇷 " + k + "<br>🌍 UTC " + uk;
-        }
-
-        function makeList(cfg, k, e) {
-            var arr = [];
-            var now = new Date().getTime();
-            for(var i=0; i<cfg.cnt; i++) {
-                var t = cfg.start + (i * cfg.gap * 3600000);
-                if(t > now - 7200000) {
-                    arr.push({k: k + " ("+(i+1)+")", e: e+" #"+(i+1), t:t});
-                }
-            }
-            return arr;
-        }
-
-        function draw(key, arr) {
-            var el = document.getElementById("l-"+key);
-            var box = document.getElementById("t-"+key);
-            var tit = document.getElementById("tt-"+key);
-
-            if(arr.length === 0) { el.innerHTML = "<div style='padding:10px; color:#777'>종료됨</div>"; return; }
-
-            var next = null;
-            for(var i=0; i<arr.length; i++) {
-                if(arr[i].t > 0) { next = arr[i]; break; }
-            }
-            TARGETS[key] = next ? next.t : 0;
-
-            if(next) {
-                box.style.display = "block";
-                tit.innerHTML = next.k;
-            } else {
-                box.style.display = "none";
-            }
-
-            var h = "";
-            for(var j=0; j<arr.length; j++) {
-                var it = arr[j];
-                var cls = (it === next) ? "row active" : "row";
-                var badge = (it === next) ? "<span class='badge'>NEXT</span>" : "";
-                h += "<div class='"+cls+"'><div><b>"+it.k+"</b>"+badge+"<div style='font-size:0.8rem;color:#888'>"+it.e+"</div></div><div class='r-right'>"+fmt(it.t)+"</div></div>";
-            }
-            el.innerHTML = h;
-        }
-
-        function init() {
-            draw("ms", DATA.ms);
-            draw("ru", makeList(DATA.ruins, "고대유적", "Ruins"));
-            draw("al", makeList(DATA.altar, "어둠제단", "Altar"));
-            setInterval(tick, 1000);
-            tick();
-        }
-
-        function tick() {
-            var now = new Date().getTime();
-            var k = new Date(now + 9*3600000);
-            var u = new Date(now);
-            var ks = k.getUTCFullYear()+"-"+pad(k.getUTCMonth()+1)+"-"+pad(k.getUTCDate())+" "+pad(k.getUTCHours())+":"+pad(k.getUTCMinutes())+":"+pad(k.getUTCSeconds());
-            var us = pad(u.getUTCHours())+":"+pad(u.getUTCMinutes())+":"+pad(u.getUTCSeconds());
-            document.getElementById("clock-box").innerHTML = "🇰🇷 " + ks + " (KST) | 🌍 " + us + " (UTC)";
-
-            upd("ms", now);
-            upd("ru", now);
-            upd("al", now);
-        }
-
-        function upd(key, now) {
-            var t = TARGETS[key];
-            var el = document.getElementById("td-"+key);
-            if(!t || t===0) return;
-            var d = t - now;
-            if(d <= 0) {
-                el.innerHTML = "OPEN NOW!";
-                el.style.color = "#00e676";
-            } else {
-                var s = Math.floor((d/1000)%60);
-                var m = Math.floor((d/60000)%60);
-                var h = Math.floor((d/3600000)%24);
-                var dd = Math.floor(d/86400000);
-                el.innerHTML = dd+"d "+pad(h)+":"+pad(m)+":"+pad(s);
-                el.style.color = "#fff";
-            }
-        }
-
-        window.toggle = function(id) {
-            var el = document.getElementById(id);
-            el.style.display = (el.style.display === "block") ? "none" : "block";
-        }
-
-        window.copyText = function(key) {
-            var t = document.getElementById("tt-"+key).innerText;
-            var time = document.getElementById("td-"+key).innerText;
-            var txt = "[1689 KVK] " + t + " : " + time + " 남음";
-            prompt("복사하세요:", txt);
-        }
-
-        init();
-
-    } catch(e) {
-        document.body.innerHTML += "<div style='color:red;'>ERROR: "+e.message+"</div>";
-    }
-    </script>
-</body>
-</html>
+                <span id="tt-ru"
