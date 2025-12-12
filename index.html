@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* ============================
-           기본 스타일 (안정성 최우선)
+           스타일 (디자인 유지)
            ============================ */
         body {
             background-color: #121212;
@@ -17,25 +17,25 @@
             text-align: center;
         }
 
-        /* 에러 메시지 박스 */
-        #debug-console {
+        /* 에러 발생시 표시되는 박스 */
+        #debug-box {
             display: none;
             background: #d32f2f; color: white;
-            padding: 15px; margin-bottom: 20px;
-            border-radius: 8px; text-align: left;
-            font-family: monospace; font-size: 0.9em;
+            padding: 10px; margin-bottom: 20px;
+            border-radius: 5px; text-align: left;
+            font-family: monospace; font-size: 0.8em;
         }
 
         h1 { color: #ffb74d; margin-bottom: 5px; font-size: 1.5rem; letter-spacing: 1px; }
         .sub-title { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
 
-        /* 시계 */
         .main-clock {
             background: rgba(255,255,255,0.05);
             padding: 10px 20px; border-radius: 20px;
             display: inline-block; margin-bottom: 20px;
             font-family: 'Roboto Mono', monospace;
             border: 1px solid #333; color: #bbb;
+            font-size: 0.9em; line-height: 1.4;
         }
 
         .container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
@@ -45,7 +45,6 @@
         .dash-card { flex: 1; min-width: 280px; background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; text-align: left; }
         .dash-head { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 10px; font-size: 1.1em; }
         
-        /* 외교 리스트 스타일 */
         .diplo-group { margin-bottom: 10px; }
         .diplo-label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.95em; }
         .diplo-list { font-size: 0.85em; color: #ccc; line-height: 1.4; }
@@ -63,31 +62,26 @@
         summary::after { content: '▼'; color: #888; font-size: 0.8em; }
         details[open] summary::after { transform: rotate(180deg); }
 
-        /* 섹션 컬러 */
         .sec-milestone summary { border-left: 5px solid #ef5350; }
         .sec-ruins summary { border-left: 5px solid #42a5f5; }
         .sec-altar summary { border-left: 5px solid #ab47bc; }
 
-        /* 내부 콘텐츠 */
         .content-area { padding: 15px; }
         
-        /* 타이머 박스 */
+        /* 타이머 */
         .timer-box { background: #151515; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; text-align: center; }
         .timer-title { font-weight: bold; color: #fff; font-size: 1.1em; }
         .timer-digits { font-family: 'Roboto Mono', monospace; font-size: 1.8em; font-weight: bold; margin-top: 5px; color: #fff; }
         
-        /* 리스트 아이템 */
+        /* 리스트 */
         .list-item { 
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(255,255,255,0.03); padding: 10px; margin-bottom: 5px; border-radius: 6px;
         }
         .list-item.active { background: rgba(255, 183, 77, 0.15); border: 1px solid #ffb74d; }
-        .list-item.tba { opacity: 0.7; border-left: 3px solid #888; } /* 추후 안내 스타일 */
-
         .item-left { text-align: left; }
         .item-right { text-align: right; font-family: 'Roboto Mono', monospace; font-size: 0.8em; color: #aaa; min-width: 120px; }
         
-        /* 배지 & 버튼 */
         .badge { font-size: 0.7em; padding: 2px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
         .bg-gold { background: #ffb74d; color: black; }
         .btn-copy { background: none; border: 1px solid #666; color: #aaa; font-size: 0.7em; cursor: pointer; border-radius: 4px; margin-left: 10px; }
@@ -101,18 +95,21 @@
 </head>
 <body>
 
-    <div id="debug-console"></div>
+    <div id="debug-box"></div>
 
     <h1>KVK 1689 COMMAND CENTER</h1>
     <div class="sub-title">Storm of Stratagems (계책의 폭풍)</div>
-    <div class="main-clock" id="main-clock">System Loading...</div>
+    
+    <div class="main-clock" id="main-clock">
+        Initializing System...<br>
+        <span style="font-size:0.8em">Please Wait</span>
+    </div>
 
     <div class="container">
 
         <div class="dashboard-grid">
             <div class="dash-card">
                 <div class="dash-head" style="color:#66bb6a">🤝 Diplomacy (외교)</div>
-                
                 <div class="diplo-group">
                     <span class="diplo-label" style="color:#66bb6a">🔵 Allies (아군)</span>
                     <div class="diplo-list">
@@ -121,19 +118,7 @@
                         <span class="faction-tag">Water (1206, 3530)</span>
                     </div>
                 </div>
-
                 <div class="diplo-group">
                     <span class="diplo-label" style="color:#ef5350">🔴 Enemies (적군)</span>
                     <div class="diplo-list">
-                        <span class="faction-tag">Fire (1393, 3253)</span>
-                        <span class="faction-tag">Earth (2877, 2620)</span>
-                        <span class="faction-tag">Wind (1486, 1305)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dash-card">
-                <div class="dash-head" style="color:#ffb74d">📢 Notice (공지)</div>
-                <ul style="padding-left:20px; margin:0; font-size:0.9em; color:#ccc; line-height:1.6">
-                    <li>⚔️ <strong>Goal:</strong> 3천만 킬 (30M Kills)</li>
-                    <li>🚜 <strong>Farming:
+                        <span class="faction-tag">Fire (139
