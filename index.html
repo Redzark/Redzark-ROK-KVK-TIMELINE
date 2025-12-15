@@ -3,78 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KVK 1689 FINAL</title>
+<title>KVK 1689 REAL MAP</title>
 <style>
-    /* === 기본 스타일 === */
-    body { background-color: #0f1215; color: #e0e0e0; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
-    h1 { color: #ffb74d; margin: 5px 0; font-size: 1.4rem; letter-spacing: 1px; }
-    .sub { color: #888; font-size: 0.8rem; margin-bottom: 10px; }
+    /* === 기본 === */
+    body { background-color: #0d1117; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; text-align: center; }
     
-    #clock-display { 
-        background: #1e2328; border: 1px solid #444; 
+    /* 시계 */
+    #clock-box { 
+        background: #161b22; border: 1px solid #30363d; 
         padding: 6px 15px; border-radius: 20px; 
         display: inline-block; margin-bottom: 15px; 
-        color: #fff; font-family: monospace; font-size: 0.9rem;
+        font-family: monospace; font-size: 0.9rem; color: #c9d1d9;
     }
 
-    .wrap { max-width: 700px; margin: 0 auto; text-align: left; }
+    .wrap { max-width: 720px; margin: 0 auto; text-align: left; }
 
-    /* === 외교 === */
-    .card { background: #1e2328; border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
-    .card-t { font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 5px; display: block; font-size: 0.95rem; color: #66bb6a; }
-    .diplo-grid { display: flex; gap: 5px; font-size: 0.8rem; }
-    .diplo-col { flex: 1; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; }
-    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin: 2px 0; color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+    /* === 1. 외교 === */
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+    .card-t { font-weight: bold; border-bottom: 1px solid #30363d; padding-bottom: 8px; margin-bottom: 10px; color: #7ee787; font-size: 1rem; }
+    .diplo-grid { display: flex; gap: 10px; }
+    .diplo-col { flex: 1; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; }
+    .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #fff; margin: 2px 2px 2px 0; border: 1px solid rgba(255,255,255,0.1); }
 
-    /* === 리얼 맵 (울퉁불퉁한 지형 SVG) === */
-    .map-box {
-        position: relative; width: 100%; padding-bottom: 60%; 
-        background: #141b21; border-radius: 12px; border: 2px solid #333;
+    /* === 2. 리얼 맵 (SVG 곡선) === */
+    .map-container {
+        position: relative; width: 100%; padding-bottom: 65%; /* 지도 비율 */
+        background: #0a0c10; border: 2px solid #30363d; border-radius: 12px;
         margin-bottom: 15px; overflow: hidden;
+        box-shadow: inset 0 0 80px #000;
     }
     
-    svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    
-    /* 지형 스타일 */
-    .land { stroke: rgba(0,0,0,0.5); stroke-width: 1; opacity: 0.9; transition: 0.2s; }
-    .land:hover { opacity: 1; stroke: #fff; stroke-width: 2; cursor: pointer; }
+    /* 배경 패턴 */
+    .map-bg {
+        position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.2;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiM1NTUiLz48L3N2Zz4=');
+    }
 
-    /* 색상 (스크린샷 기반) */
-    .f-fire { fill: #c62828; }   /* 좌상: 빨강 */
-    .f-earth { fill: #f57c00; }  /* 중상: 주황 */
-    .f-wind { fill: #7b1fa2; }   /* 우상: 보라 */
-    .f-day { fill: #fbc02d; }    /* 좌하: 노랑 */
-    .f-green { fill: #43a047; }  /* 중하: 초록 */
-    .f-water { fill: #039be5; }  /* 우하: 하늘 */
-    .f-center { fill: #37474f; } /* 중앙: 어두운 청회색 */
+    svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    
+    /* 지형 스타일 - 울퉁불퉁함 표현 */
+    .land { 
+        stroke: rgba(255,255,255,0.4); stroke-width: 1.5; 
+        opacity: 0.9; transition: 0.2s; cursor: default;
+    }
+    .land:hover { opacity: 1; stroke: #fff; stroke-width: 3; filter: brightness(1.2); }
+
+    /* 색상 (스크린샷 싱크로) */
+    .f-fire { fill: #b71c1c; }   /* 빨강 */
+    .f-earth { fill: #e65100; }  /* 주황 */
+    .f-wind { fill: #4a148c; }   /* 보라 */
+    .f-day { fill: #f57f17; }    /* 노랑 */
+    .f-green { fill: #2e7d32; }  /* 초록 */
+    .f-water { fill: #0277bd; }  /* 파랑 */
+    
+    /* 킹스랜드 - 중앙 */
+    .f-kl { fill: rgba(30, 30, 30, 0.6); stroke: #ffb74d; stroke-width: 3; stroke-dasharray: 6,4; }
 
     /* 텍스트 */
-    text { font-family: sans-serif; text-anchor: middle; pointer-events: none; fill: white; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
-    .tx-main { font-size: 14px; }
-    .tx-sub { font-size: 10px; fill: #eee; font-weight: normal; }
-    .tx-kl { font-size: 16px; fill: #ffb74d; }
+    text { font-family: 'Segoe UI', sans-serif; text-anchor: middle; pointer-events: none; fill: white; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+    .tx-main { font-size: 16px; }
+    .tx-sub { font-size: 11px; fill: #eee; font-weight: normal; font-family: monospace; }
+    .tx-kl { font-size: 18px; fill: #ffb74d; letter-spacing: 1px; }
 
-    /* === 리스트 === */
-    .sec { border: 1px solid #333; border-radius: 8px; background: #1e1e1e; margin-bottom: 8px; overflow: hidden; }
-    .sec-h { padding: 10px; background: #252525; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.9rem; }
-    .sec-b { display: none; padding: 10px; border-top: 1px solid #333; }
+    /* === 공지 & 리스트 === */
+    .sec { border: 1px solid #30363d; border-radius: 8px; background: #161b22; margin-bottom: 10px; overflow: hidden; }
+    .sec-h { padding: 10px 15px; background: #21262d; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px solid #30363d; }
+    .sec-b { display: none; padding: 10px; background: #0d1117; }
     .sec-b.on { display: block; }
 
-    .t-disp { text-align: center; background: #111; padding: 8px; border-radius: 5px; margin-bottom: 5px; border: 1px solid #333; display: none; }
-    .t-val { font-size: 1.3rem; font-weight: bold; font-family: monospace; color: #fff; }
+    .t-disp { text-align: center; background: #161b22; padding: 8px; border-radius: 6px; margin-bottom: 5px; border: 1px solid #30363d; display: none; }
+    .t-val { font-size: 1.4rem; font-weight: bold; font-family: monospace; color: #fff; margin-top: 2px; display: block; }
     
-    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #333; font-size: 0.85rem; }
-    .row.active { background: rgba(102, 187, 106, 0.15); border-left: 3px solid #66bb6a; }
-    .r-right { text-align: right; color: #aaa; font-size: 0.75rem; font-family: monospace; }
-    .badge { background: #ffb74d; color: #000; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 5px; }
-    .copy-btn { background: #333; border: 1px solid #555; color: #ccc; font-size: 0.7rem; cursor: pointer; border-radius: 3px; margin-left: 8px; }
+    .row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid #21262d; font-size: 0.85rem; }
+    .row:last-child { border-bottom: none; }
+    .row.active { background: rgba(46, 160, 67, 0.15); border-left: 3px solid #3fb950; }
+    .r-right { text-align: right; color: #8b949e; font-family: monospace; }
+    
+    .badge { background: #d29922; color: #000; padding: 1px 5px; border-radius: 10px; font-size: 0.65rem; margin-left: 5px; }
+    .copy-btn { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; font-size: 0.7rem; cursor: pointer; border-radius: 4px; margin-left: 10px; padding: 2px 6px; }
 </style>
 </head>
 <body>
 
-    <h1>KVK 1689 WAR ROOM</h1>
-    <div class="sub">Storm of Stratagems (계책의 폭풍)</div>
-    <div id="clock-display">Loading...</div>
+    <h1 style="color:#ffb74d;">KVK 1689 WAR ROOM</h1>
+    <div style="color:#8b949e; font-size:0.85rem; margin-bottom:15px;">Storm of Stratagems (계책의 폭풍)</div>
+    <div id="clock-box">System Initializing...</div>
 
     <div class="wrap">
         
@@ -82,51 +95,61 @@
             <span class="card-t">🤝 Diplomacy</span>
             <div class="diplo-grid">
                 <div class="diplo-col" style="border-left:3px solid #66bb6a">
-                    <div style="color:#66bb6a; font-weight:bold; margin-bottom:4px">🔵 Allies</div>
-                    <span class="tag" style="background:#fbc02d; color:#000">Daybreak</span>
-                    <span class="tag" style="background:#43a047">Greenwood</span>
-                    <span class="tag" style="background:#039be5">Water</span>
+                    <div style="color:#66bb6a; font-weight:bold; margin-bottom:5px">🔵 Allies</div>
+                    <span class="tag" style="background:#f9a825; color:#000">Daybreak</span>
+                    <span class="tag" style="background:#2e7d32">Greenwood</span>
+                    <span class="tag" style="background:#0277bd">Water</span>
                 </div>
                 <div class="diplo-col" style="border-left:3px solid #ef5350">
-                    <div style="color:#ef5350; font-weight:bold; margin-bottom:4px">🔴 Enemies</div>
+                    <div style="color:#ef5350; font-weight:bold; margin-bottom:5px">🔴 Enemies</div>
                     <span class="tag" style="background:#c62828">Fire</span>
-                    <span class="tag" style="background:#f57c00">Earth</span>
-                    <span class="tag" style="background:#7b1fa2">Wind</span>
+                    <span class="tag" style="background:#ef6c00">Earth</span>
+                    <span class="tag" style="background:#6a1b9a">Wind</span>
                 </div>
             </div>
         </div>
 
-        <div class="map-box">
-            <svg viewBox="0 0 1000 600" preserveAspectRatio="none">
-                <path d="M 0 0 L 1000 0 L 1000 600 L 0 600 Z" fill="#263238" />
+        <div class="map-container">
+            <div class="map-bg"></div>
+            <svg viewBox="0 0 1000 650" preserveAspectRatio="none">
+                
+                <path class="land f-fire" d="M 20,20 L 330,20 Q 350,100 330,200 Q 250,230 180,250 Q 100,220 20,200 Z" />
+                <text x="160" y="110" class="tx-main">🔥 FIRE</text>
+                <text x="160" y="135" class="tx-sub">1393, 3253</text>
 
-                <path class="land f-fire" d="M 10,10 L 330,10 L 340,50 L 320,150 L 340,200 L 250,250 L 150,220 L 10,250 Z" />
-                <text x="150" y="100" class="tx-main">🔥 FIRE</text>
-                <text x="150" y="120" class="tx-sub">1393, 3253</text>
+                <path class="land f-earth" d="M 340,20 L 660,20 L 670,50 Q 650,150 670,220 Q 600,260 500,270 Q 400,260 330,220 Q 350,150 330,50 Z" />
+                <text x="500" y="110" class="tx-main">⛰️ EARTH</text>
+                <text x="500" y="135" class="tx-sub">2877, 2620</text>
 
-                <path class="land f-earth" d="M 340,10 L 660,10 L 670,50 L 650,200 L 500,280 L 350,200 L 330,50 Z" />
-                <text x="500" y="100" class="tx-main">⛰️ EARTH</text>
-                <text x="500" y="120" class="tx-sub">2877, 2620</text>
+                <path class="land f-wind" d="M 670,20 L 980,20 L 980,200 Q 900,220 820,250 Q 750,230 670,200 Q 650,100 670,20 Z" />
+                <text x="840" y="110" class="tx-main">🍃 WIND</text>
+                <text x="840" y="135" class="tx-sub">1486, 1305</text>
 
-                <path class="land f-wind" d="M 670,10 L 990,10 L 990,250 L 850,220 L 750,250 L 660,200 L 680,150 L 660,50 Z" />
-                <text x="850" y="100" class="tx-main">🍃 WIND</text>
-                <text x="850" y="120" class="tx-sub">1486, 1305</text>
+                <path class="land f-day" d="M 20,630 L 330,630 Q 350,550 330,450 Q 250,420 180,400 Q 100,430 20,450 Z" />
+                <text x="160" y="530" class="tx-main" fill="black" style="text-shadow:none">☀️ DAYBREAK</text>
+                <text x="160" y="555" class="tx-sub" fill="#222" style="font-weight:bold">1689, 2334</text>
 
-                <path class="land f-day" d="M 10,590 L 330,590 L 340,550 L 320,450 L 340,400 L 250,350 L 150,380 L 10,350 Z" />
-                <text x="150" y="500" class="tx-main" fill="black" style="text-shadow:none">☀️ DAYBREAK</text>
-                <text x="150" y="520" class="tx-sub" fill="#222" style="font-weight:bold">1689, 2334</text>
+                <path class="land f-green" d="M 340,630 L 660,630 L 670,600 Q 650,500 670,430 Q 600,390 500,380 Q 400,390 330,430 Q 350,500 330,600 Z" />
+                <text x="500" y="530" class="tx-main">🌲 GREENWOOD</text>
+                <text x="500" y="555" class="tx-sub">3155, 2238</text>
 
-                <path class="land f-green" d="M 340,590 L 660,590 L 670,550 L 650,400 L 500,320 L 350,400 L 330,550 Z" />
-                <text x="500" y="500" class="tx-main">🌲 GREENWOOD</text>
-                <text x="500" y="520" class="tx-sub">3155, 2238</text>
+                <path class="land f-water" d="M 670,630 L 980,630 L 980,450 Q 900,430 820,400 Q 750,420 670,450 Q 650,550 670,630 Z" />
+                <text x="840" y="530" class="tx-main">💧 WATER</text>
+                <text x="840" y="555" class="tx-sub">1206, 3530</text>
 
-                <path class="land f-water" d="M 670,590 L 990,590 L 990,350 L 850,380 L 750,350 L 660,400 L 680,450 L 660,550 Z" />
-                <text x="850" y="500" class="tx-main">💧 WATER</text>
-                <text x="850" y="520" class="tx-sub">1206, 3530</text>
+                <path class="f-kl" d="M 350,290 Q 500,270 650,290 L 650,360 Q 500,380 350,360 Z" />
+                <text x="500" y="335" class="tx-kl">KING'S LAND</text>
 
-                <text x="500" y="305" class="tx-kl">KING'S LAND</text>
-                <rect x="420" y="270" width="160" height="60" rx="10" fill="none" stroke="#ffb74d" stroke-width="2" stroke-dasharray="5,5"/>
             </svg>
+        </div>
+
+        <div class="card" style="border-color:#d29922">
+            <span class="card-t" style="color:#d29922; border:none; margin:0; padding:0">📢 Notice</span>
+            <ul style="padding-left:20px; margin:5px 0 0 0; font-size:0.85rem; color:#8b949e;">
+                <li>⚔️ Goal: 3천만 킬 (30M Kills)</li>
+                <li>🚜 Farming: 자유 (Free)</li>
+                <li>⛔ City Hit: 금지 (No Zeroing)</li>
+            </ul>
         </div>
 
         <div class="sec">
@@ -196,10 +219,9 @@
         function fmt(ts) {
             if(ts===0) return "TBA";
             var d = new Date(ts + 9*3600000);
-            return "🇰🇷 "+(d.getUTCMonth()+1)+"."+d.getUTCDate()+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes());
+            return (d.getUTCMonth()+1)+"."+d.getUTCDate()+" "+pad(d.getUTCHours())+":"+pad(d.getUTCMinutes());
         }
 
-        // 리스트 생성
         function makeList(cfg, k, e) {
             var arr = [];
             var now = new Date().getTime();
@@ -210,23 +232,18 @@
             return arr;
         }
 
-        // 그리기 (NEXT 로직 수정됨)
         function draw(key, arr) {
             var el = document.getElementById("l-"+key);
-            if(arr.length===0) { el.innerHTML="종료"; return; }
-
-            // NEXT 찾기: 현재 시간보다 큰 첫 번째 항목
+            if(arr.length === 0) { el.innerHTML = "종료"; return; }
+            
+            // NEXT 로직: 현재 시간보다 미래인 첫 번째
             var now = new Date().getTime();
             var next = null;
             for(var i=0; i<arr.length; i++) {
                 if(arr[i].t > now) { next = arr[i]; break; }
             }
-            
-            // 만약 미래 일정이 없으면(모두 지났거나 TBA면)
-            if(!next && arr.length > 0 && arr[arr.length-1].t === 0) {
-                // TBA가 있으면 그걸 next로
-                for(var i=0; i<arr.length; i++) { if(arr[i].t === 0) { next = arr[i]; break; } }
-            }
+            // 없으면 TBA(0) 찾기
+            if(!next && arr[arr.length-1].t === 0) next = arr.find(function(i){ return i.t===0; });
 
             TARGETS[key] = next ? next.t : 0;
 
@@ -240,14 +257,12 @@
             var h = "";
             for(var j=0; j<arr.length; j++) {
                 var it = arr[j];
-                var isNext = (it === next);
+                var isNext = (it===next);
                 var cls = isNext ? "row active" : "row";
                 var bdg = isNext ? "<span class='badge'>NEXT</span>" : "";
-                
-                // 이미 지난 일정은 흐리게 표시
                 var style = (it.t < now && it.t !== 0) ? "opacity:0.5" : "";
                 
-                h += "<div class='"+cls+"' style='"+style+"'><div><b>"+it.k+"</b>"+bdg+"<div style='font-size:0.75rem;color:#888'>"+it.e+"</div></div><div class='r-right'>"+fmt(it.t)+"</div></div>";
+                h += "<div class='"+cls+"' style='"+style+"'><div><b>"+it.k+"</b>"+bdg+"</div><div class='r-right'>"+fmt(it.t)+"</div></div>";
             }
             el.innerHTML = h;
         }
@@ -255,10 +270,8 @@
         function tick() {
             var now = new Date().getTime();
             var k = new Date(now + 9*3600000);
-            var u = new Date(now);
             var ks = k.getUTCFullYear()+"-"+pad(k.getUTCMonth()+1)+"-"+pad(k.getUTCDate())+" "+pad(k.getUTCHours())+":"+pad(k.getUTCMinutes())+":"+pad(k.getUTCSeconds());
-            var us = pad(u.getUTCHours())+":"+pad(u.getUTCMinutes())+":"+pad(u.getUTCSeconds());
-            document.getElementById("clock-display").innerText = "🇰🇷 " + ks + " (KST) | 🌍 " + us + " (UTC)";
+            document.getElementById("clock-box").innerText = "🇰🇷 " + ks + " (KST)";
 
             upd("ms", now); upd("ru", now); upd("al", now);
         }
@@ -266,7 +279,7 @@
         function upd(key, now) {
             var t = TARGETS[key];
             var el = document.getElementById("td-"+key);
-            if(!t || t===0) return;
+            if(!t || t===0 || !el) return;
             var d = t - now;
             if(d<=0) { el.innerHTML = "OPEN!"; el.style.color="#00e676"; }
             else {
@@ -290,17 +303,12 @@
             prompt("Copy:", t + " : " + time);
         }
 
-        // 데이터 정렬 (날짜순)
-        DATA.ms.sort(function(a,b){ 
-            if(a.t===0) return 1; if(b.t===0) return -1;
-            return a.t - b.t; 
-        });
-
         draw("ms", DATA.ms);
         draw("ru", makeList(DATA.ruins, "고대유적", "Ruins"));
         draw("al", makeList(DATA.altar, "어둠제단", "Altar"));
         setInterval(tick, 1000);
         tick();
+
     })();
     </script>
 </body>
